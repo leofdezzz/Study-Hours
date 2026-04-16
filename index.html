@@ -676,7 +676,7 @@ function renderChart() {
   days.forEach((d,i)=>{
     const isT = dk(d)===tok;
     const v   = vals[i];
-    const hp  = Math.max(v/mx*85, v>0?5:1);
+    const hp  = v === 0 ? 0 : Math.max(v/mx*85, 5);
 
     const col = document.createElement('div');
     col.className = 'bar-col';
@@ -709,6 +709,9 @@ function renderSubjects() {
       </div>`;
     return;
   }
+
+  const emptyEl = list.querySelector('.empty');
+  if (emptyEl) emptyEl.remove();
 
   const seen = new Set();
   data.subjects.forEach((sub, idx) => {
