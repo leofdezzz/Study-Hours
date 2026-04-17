@@ -3,31 +3,45 @@ const express = require('express');
 const bcrypt  = require('bcryptjs');
 const jwt     = require('jsonwebtoken');
 const path    = require('path');
+const fs      = require('fs');
 
 const app        = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'sh_secret_cambia_esto_en_produccion';
 const PORT       = process.env.PORT || 3000;
-const DB_PATH    = process.env.DB_PATH    || path.join(__dirname, 'data.db');
+const DB_PATH    = process.env.DB_PATH || path.join(__dirname, 'data.db');
+
+/* ─── Ensure DB directory exists ─── */
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 /* ─── SQLite ─── */
-const db = new DatabaseSync(DB_PATH);
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id            TEXT PRIMARY KEY,
-    username      TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS user_data (
-    user_id  TEXT PRIMARY KEY,
-    subjects TEXT NOT NULL DEFAULT '[]',
-    logs     TEXT NOT NULL DEFAULT '{}',
-    FOREIGN KEY (user_id) REFERENCES users(id)
-  );
-`);
+let db;
+try {
+  db = new DatabaseSync(DB_PATH);
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id            TEXT PRIMARY KEY,
+      username      TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS user_data (
+      user_id  TEXT PRIMARY KEY,
+      subjects TEXT NOT NULL DEFAULT '[]',
+      logs     TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+  `);
+  console.log(`DB: ${DB_PATH}`);
+} catch (e) {
+  console.error('Error abriendo la base de datos:', e.message);
+  process.exit(1);
+}
 
 /* ─── Middleware ─── */
 app.use(express.json());
 app.use(express.static(__dirname));
+
+/* ─── Health check (Railway lo usa para verificar que el servicio vive) ─── */
+app.get('/health', (req, res) => res.json({ ok: true }));
 
 function auth(req, res, next) {
   const h = req.headers.authorization;
@@ -97,13 +111,17 @@ app.put('/api/data', auth, (req, res) => {
   res.json({ ok: true });
 });
 
+/* ─── Uncaught errors ─── */
+process.on('uncaughtException', e => {
+  console.error('Error no capturado:', e.message);
+  process.exit(1);
+});
+
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\nStudy Hours en http://localhost:${PORT}`);
-  console.log(`Red local: http://<tu-IP>:${PORT}\n`);
+  console.log(`Study Hours en http://localhost:${PORT}`);
 }).on('error', e => {
   if (e.code === 'EADDRINUSE') {
-    console.error(`\nError: el puerto ${PORT} ya está en uso.`);
-    console.error(`Cierra el proceso anterior o usa otro puerto: PORT=3001 npm start\n`);
+    console.error(`Puerto ${PORT} ya en uso. Prueba: PORT=3001 npm start`);
   } else {
     console.error(e);
   }
