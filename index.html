@@ -1258,7 +1258,7 @@ function openCreateGroup() {
   document.getElementById('J_colorRow').style.display = 'none';
   document.getElementById('J_sheetActs').innerHTML = `
     <button class="sbtn secondary" onclick="hideSheet()">Cancelar</button>
-    <button class="sbtn primary"   onclick="doCreateGroup()">Crear</button>`;
+    <button class="sbtn primary"   id="J_save" onclick="doCreateGroup()">Crear</button>`;
   showSheet();
 }
 
@@ -1271,7 +1271,7 @@ function openJoinGroup() {
   document.getElementById('J_colorRow').style.display = 'none';
   document.getElementById('J_sheetActs').innerHTML = `
     <button class="sbtn secondary" onclick="hideSheet()">Cancelar</button>
-    <button class="sbtn primary"   onclick="doJoinGroup()">Unirse</button>`;
+    <button class="sbtn primary"   id="J_save" onclick="doJoinGroup()">Unirse</button>`;
   showSheet();
 }
 
