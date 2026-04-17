@@ -7,9 +7,10 @@ const path    = require('path');
 const app        = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'sh_secret_cambia_esto_en_produccion';
 const PORT       = process.env.PORT || 3000;
+const DB_PATH    = process.env.DB_PATH    || path.join(__dirname, 'data.db');
 
 /* ─── SQLite ─── */
-const db = new DatabaseSync(path.join(__dirname, 'data.db'));
+const db = new DatabaseSync(DB_PATH);
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id            TEXT PRIMARY KEY,
