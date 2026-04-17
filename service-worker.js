@@ -1,4 +1,4 @@
-const CACHE = 'study-hours-v1';
+const CACHE = 'study-hours-v2';
 const STATIC = ['/', '/index.html', '/manifest.json', '/icon.svg'];
 
 self.addEventListener('install', e => {
@@ -16,9 +16,7 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // API calls: network only (always fresh data)
   if (e.request.url.includes('/api/')) return;
-
   e.respondWith(
     caches.match(e.request).then(cached => {
       const network = fetch(e.request).then(res => {
@@ -31,4 +29,21 @@ self.addEventListener('fetch', e => {
       return cached || network;
     })
   );
+});
+
+self.addEventListener('push', e => {
+  const data = e.data?.json() || { title: 'Study Hours', body: '' };
+  e.waitUntil(
+    self.registration.showNotification(data.title, {
+      body:    data.body,
+      icon:    '/icon.svg',
+      badge:   '/icon.svg',
+      vibrate: [200, 100, 200]
+    })
+  );
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(clients.openWindow('/'));
 });

@@ -506,6 +506,52 @@
       .hdr  { padding: 60px 0 28px; max-width: 460px; margin: 0 auto; }
       body  { padding-bottom: 80px; }
     }
+
+    /* ─── Goal bar ─── */
+    .goal-wrap { margin-bottom: 10px; }
+    .goal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .goal-bar-bg { height: 4px; background: var(--s3); border-radius: 2px; overflow: hidden; }
+    .goal-bar-fill {
+      height: 100%; background: #fff; border-radius: 2px;
+      transition: width .6s cubic-bezier(.34,1.2,.64,1);
+    }
+    .goal-bar-fill.done { background: var(--green); }
+
+    /* ─── Best streak ─── */
+    .streak-best { font-size: 10px; color: var(--t3); margin-top: 2px; }
+
+    /* ─── Exam badge ─── */
+    .exam-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 10px; font-weight: 600; padding: 2px 7px;
+      border-radius: 6px; margin-top: 3px;
+    }
+    .exam-badge.urgent { color: var(--red);  background: rgba(252,165,165,.12); }
+    .exam-badge.normal { color: var(--t3);   background: var(--s2); }
+
+    /* ─── Date input ─── */
+    .date-label { font-size: 11px; font-weight: 600; color: var(--t3); margin-bottom: 6px; display: block; }
+
+    /* ─── Reactions ─── */
+    .lb-reactions { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+    .lb-reaction {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 3px 8px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--s2); font-size: 12px; cursor: pointer; line-height: 1.4;
+      transition: background .15s, border-color .15s;
+      font-family: inherit; color: var(--t2); font-weight: 600;
+    }
+    .lb-reaction:hover { background: var(--s3); border-color: #383838; }
+    .lb-reaction.mine  { border-color: #555; background: var(--s3); color: var(--text); }
+
+    /* ─── Push / settings buttons (same family as logout-btn) ─── */
+    .hdr-icon-btn {
+      background: none; border: 1px solid var(--border); border-radius: 8px;
+      color: var(--t3); font-size: 13px; padding: 3px 8px;
+      cursor: pointer; transition: color .15s, border-color .15s; font-family: inherit; line-height: 1.4;
+    }
+    .hdr-icon-btn:hover { color: var(--t2); border-color: #383838; }
+    .hdr-icon-btn.on { color: var(--green); border-color: rgba(134,239,172,.3); }
   </style>
 </head>
 <body>
@@ -548,6 +594,15 @@
       <div class="stat-val" id="J_weekVal">0h</div>
       <div class="badge neu" id="J_weekBadge">—</div>
     </div>
+  </div>
+
+  <!-- Goal bar -->
+  <div class="goal-wrap" id="J_goalWrap" style="display:none;">
+    <div class="goal-head">
+      <span class="card-title">Meta diaria</span>
+      <span id="J_goalProgress" style="font-size:11px;font-weight:600;color:var(--t3);"></span>
+    </div>
+    <div class="goal-bar-bg"><div class="goal-bar-fill" id="J_goalFill" style="width:0%"></div></div>
   </div>
 
   <!-- Streak -->
@@ -638,6 +693,10 @@
     <input type="text" class="txt-input" id="J_input" placeholder="Nombre de la asignatura"
            maxlength="40" autocomplete="off" spellcheck="false">
     <div class="color-row" id="J_colorRow"></div>
+    <div id="J_examRow" style="display:none; margin-bottom:16px;">
+      <label class="date-label">Fecha del examen <span style="font-weight:400;">(opcional)</span></label>
+      <input type="date" class="txt-input" id="J_examInput" style="margin-bottom:0;">
+    </div>
     <div class="sheet-acts" id="J_sheetActs"></div>
   </div>
 </div>
@@ -649,8 +708,9 @@
 /* ═══════════════════════════════════
    Constants
 ═══════════════════════════════════ */
-const COLORS = ['#a78bfa','#60a5fa','#34d399','#fbbf24','#f87171','#f472b6','#22d3ee','#fb923c'];
-const POMO   = 25 / 60; // 0.4166... hours
+const COLORS      = ['#a78bfa','#60a5fa','#34d399','#fbbf24','#f87171','#f472b6','#22d3ee','#fb923c'];
+const POMO        = 25 / 60; // 0.4166... hours
+const VALID_EMOJIS = ['🔥','💀','😤','👑'];
 
 /* ═══════════════════════════════════
    Auth
@@ -724,7 +784,9 @@ async function doAuth() {
 function logout() {
   clearToken();
   currentUser = null;
-  data = { subjects: [], logs: {} };
+  data       = { subjects: [], logs: {} };
+  settings   = {};
+  pushEnabled = false;
   weekOffset = 0;
   const userEl = document.getElementById('J_userInfo');
   userEl.style.display = 'none';
@@ -742,8 +804,10 @@ document.getElementById('J_authPass').addEventListener('keydown', e => {
 /* ═══════════════════════════════════
    Data layer
 ═══════════════════════════════════ */
-let data = { subjects: [], logs: {} };
-let editId = null;
+let data       = { subjects: [], logs: {} };
+let settings   = {};
+let pushEnabled = false;
+let editId     = null;
 let weekOffset = 0;
 
 async function apiFetch(path, opts = {}) {
@@ -805,13 +869,26 @@ function grandTotal() { return data.subjects.reduce((s,sub) => s + subAll(sub.id
 function calcStreak() {
   const d = new Date();
   let streak = 0;
-  // If no hours today, check from yesterday
   if (daySum(dk(d)) === 0) d.setDate(d.getDate() - 1);
   while (daySum(dk(d)) > 0) {
     streak++;
     d.setDate(d.getDate() - 1);
   }
   return streak;
+}
+
+function bestStreak() {
+  const dates = Object.keys(data.logs)
+    .filter(k => daySum(k) > 0)
+    .sort();
+  if (!dates.length) return 0;
+  let best = 1, cur = 1;
+  for (let i = 1; i < dates.length; i++) {
+    const diff = (new Date(dates[i]) - new Date(dates[i-1])) / 86400000;
+    if (diff === 1) { cur++; if (cur > best) best = cur; }
+    else cur = 1;
+  }
+  return best;
 }
 
 /* ═══════════════════════════════════
@@ -841,6 +918,22 @@ function adjust(sid, delta) {
 /* ═══════════════════════════════════
    Formatting
 ═══════════════════════════════════ */
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const exam = new Date(dateStr + 'T00:00:00');
+  return Math.ceil((exam - now) / 86400000);
+}
+
+function examBadgeHtml(examDate) {
+  const d = daysUntil(examDate);
+  if (d === null || d < 0) return '';
+  if (d === 0) return `<div class="exam-badge urgent">📅 Examen hoy</div>`;
+  if (d === 1) return `<div class="exam-badge urgent">📅 Examen mañana</div>`;
+  if (d <= 7)  return `<div class="exam-badge urgent">📅 ${d} días para el examen</div>`;
+  return `<div class="exam-badge normal">📅 ${d} días para el examen</div>`;
+}
+
 function fmt(h) {
   if (h === 0) return '0h';
   const hr = Math.floor(h), mn = Math.round((h - hr) * 60);
@@ -863,6 +956,7 @@ function pct(now, prev) {
 function render() {
   renderHeader();
   renderStats();
+  renderGoalBar();
   renderStreak();
   renderChart();
   renderSubjects();
@@ -877,8 +971,14 @@ function renderHeader() {
 
   const userEl = document.getElementById('J_userInfo');
   if (currentUser) {
+    const pushSupported = ('Notification' in window) && ('serviceWorker' in navigator) && ('PushManager' in window);
+    const pushHtml = pushSupported
+      ? `<button class="hdr-icon-btn${pushEnabled ? ' on' : ''}" id="J_pushBtn" onclick="togglePush()" title="${pushEnabled ? 'Desactivar notificaciones' : 'Activar notificaciones'}">${pushEnabled ? '🔔' : '🔕'}</button>`
+      : '';
     userEl.innerHTML = `
       <span class="hdr-username">${esc(currentUser)}</span>
+      <button class="hdr-icon-btn" onclick="openGoalSheet()" title="Meta diaria">⚙</button>
+      ${pushHtml}
       <button class="logout-btn" onclick="logout()">Salir</button>`;
     userEl.style.display = 'flex';
   }
@@ -912,6 +1012,7 @@ function renderStats() {
 
 function renderStreak() {
   const streak = calcStreak();
+  const best   = bestStreak();
   const icon   = document.getElementById('J_streakIcon');
   const lbl    = document.getElementById('J_streakLbl');
   const sub    = document.getElementById('J_streakSub');
@@ -920,7 +1021,7 @@ function renderStreak() {
   if (streak === 0) {
     icon.textContent = '—';
     lbl.textContent  = 'Sin racha activa';
-    sub.textContent  = 'Estudia hoy para empezar';
+    sub.textContent  = best > 0 ? `Mejor racha: ${best} ${best === 1 ? 'día' : 'días'}` : 'Estudia hoy para empezar';
     val.textContent  = '';
   } else {
     icon.textContent = '🔥';
@@ -928,6 +1029,12 @@ function renderStreak() {
     sub.textContent  = streak >= 7 ? '¡Semana completa!' :
                        streak >= 3 ? '¡Sigue así!' : 'Buen comienzo';
     val.textContent  = `${streak}`;
+    // Mostrar mejor racha si la actual no la supera
+    if (best > streak) {
+      sub.textContent += ` · Mejor: ${best}d`;
+    } else if (streak === best && streak > 1) {
+      sub.textContent += ' · ¡Récord personal!';
+    }
   }
 }
 
@@ -999,6 +1106,8 @@ function renderSubjects() {
         weekOffset === 0
           ? `${fmt(wk)} esta semana`
           : `${fmt(wk)} esa semana`;
+      const examEl = card.querySelector('.sc-exam');
+      if (examEl) examEl.innerHTML = examBadgeHtml(sub.examDate);
       const hEl = card.querySelector('.sc-today');
       if (hEl.textContent !== fmt(tod)) {
         hEl.textContent = fmt(tod);
@@ -1016,6 +1125,7 @@ function renderSubjects() {
         <div class="sc-info">
           <div class="sc-name">${esc(sub.name)}</div>
           <div class="sc-week">${fmt(wk)} ${weekOffset === 0 ? 'esta semana' : 'esa semana'}</div>
+          <div class="sc-exam">${examBadgeHtml(sub.examDate)}</div>
         </div>
         <div class="sc-today">${fmt(tod)}</div>
         <div class="sc-ctrl">
@@ -1048,7 +1158,7 @@ function renderSubjects() {
 
       card.querySelector('.sc-edit').addEventListener('click', () => {
         const s = data.subjects.find(s => s.id === sub.id);
-        if (s) openEdit(s.id, s.name, s.color || COLORS[0]);
+        if (s) openEdit(s.id, s.name, s.color || COLORS[0], s.examDate || '');
       });
 
       list.appendChild(card);
@@ -1062,6 +1172,19 @@ function renderSubjects() {
 
 function renderTotal() {
   document.getElementById('J_total').textContent = fmt(grandTotal());
+}
+
+function renderGoalBar() {
+  const goal = parseFloat(settings.dailyGoal) || 0;
+  const wrap = document.getElementById('J_goalWrap');
+  if (goal <= 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  const tod  = daySum(today());
+  const pct  = Math.min(100, Math.round(tod / goal * 100));
+  const fill = document.getElementById('J_goalFill');
+  fill.style.width = `${pct}%`;
+  fill.className = `goal-bar-fill${pct >= 100 ? ' done' : ''}`;
+  document.getElementById('J_goalProgress').textContent = `${fmt(tod)} / ${fmt(goal)}`;
 }
 
 /* ═══════════════════════════════════
@@ -1135,9 +1258,11 @@ function openAdd() {
   sheetMode = 'subject';
   editId = null;
   document.getElementById('J_sheetTitle').textContent = 'Nueva asignatura';
+  document.getElementById('J_input').type = 'text';
   document.getElementById('J_input').placeholder = 'Nombre de la asignatura';
   document.getElementById('J_input').value = '';
   document.getElementById('J_colorRow').style.display = 'flex';
+  document.getElementById('J_examRow').style.display = 'none';
   buildColorPicker(COLORS[0]);
   document.getElementById('J_sheetActs').innerHTML = `
     <button class="sbtn secondary" onclick="hideSheet()">Cancelar</button>
@@ -1145,13 +1270,16 @@ function openAdd() {
   showSheet();
 }
 
-function openEdit(id, name, color) {
+function openEdit(id, name, color, examDate = '') {
   sheetMode = 'subject';
   editId = id;
   document.getElementById('J_sheetTitle').textContent = 'Editar asignatura';
+  document.getElementById('J_input').type = 'text';
   document.getElementById('J_input').placeholder = 'Nombre de la asignatura';
   document.getElementById('J_input').value = name;
   document.getElementById('J_colorRow').style.display = 'flex';
+  document.getElementById('J_examRow').style.display = 'block';
+  document.getElementById('J_examInput').value = examDate;
   buildColorPicker(color);
   document.getElementById('J_sheetActs').innerHTML = `
     <button class="sbtn danger"  onclick="doDelete()">Eliminar</button>
@@ -1164,7 +1292,13 @@ function doSave() {
   if (!name) { document.getElementById('J_input').focus(); return; }
   if (editId) {
     const s = data.subjects.find(s => s.id === editId);
-    if (s) { s.name = name; s.color = selectedColor; persist(); }
+    if (s) {
+      s.name  = name;
+      s.color = selectedColor;
+      const examVal = document.getElementById('J_examInput').value;
+      s.examDate = examVal || null;
+      persist();
+    }
   } else {
     data.subjects.push({ id: `${Date.now()}`, name, color: selectedColor });
     persist();
@@ -1206,10 +1340,110 @@ document.getElementById('J_input').addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     if      (sheetMode === 'createGroup') doCreateGroup();
     else if (sheetMode === 'joinGroup')   doJoinGroup();
+    else if (sheetMode === 'goal')        doSaveGoal();
     else                                  doSave();
   }
   if (e.key === 'Escape') hideSheet();
 });
+
+/* ═══════════════════════════════════
+   Settings & Goal
+═══════════════════════════════════ */
+async function loadSettings() {
+  try {
+    const res = await apiFetch('/api/settings');
+    if (res.ok) settings = await res.json();
+  } catch {}
+}
+
+async function saveSettings(patch) {
+  settings = { ...settings, ...patch };
+  apiFetch('/api/settings', { method: 'PUT', body: JSON.stringify(settings) }).catch(() => {});
+}
+
+function openGoalSheet() {
+  sheetMode = 'goal';
+  editId = null;
+  document.getElementById('J_sheetTitle').textContent = 'Meta diaria';
+  const inp = document.getElementById('J_input');
+  inp.type        = 'number';
+  inp.min         = '0';
+  inp.max         = '24';
+  inp.step        = '0.5';
+  inp.placeholder = 'Horas por día (0 = sin meta)';
+  inp.value       = settings.dailyGoal || '';
+  document.getElementById('J_colorRow').style.display = 'none';
+  document.getElementById('J_examRow').style.display  = 'none';
+  document.getElementById('J_sheetActs').innerHTML = `
+    <button class="sbtn secondary" onclick="hideSheet()">Cancelar</button>
+    <button class="sbtn primary"   onclick="doSaveGoal()">Guardar</button>`;
+  showSheet();
+}
+
+function doSaveGoal() {
+  const val  = parseFloat(document.getElementById('J_input').value) || 0;
+  const goal = Math.max(0, Math.min(24, val));
+  saveSettings({ dailyGoal: goal });
+  hideSheet();
+  render();
+  toast(goal > 0 ? `✓ Meta: ${fmt(goal)} al día` : 'Meta eliminada');
+}
+
+/* ═══════════════════════════════════
+   Push notifications
+═══════════════════════════════════ */
+function urlBase64ToUint8Array(b64) {
+  const pad = '='.repeat((4 - b64.length % 4) % 4);
+  const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+async function initPush() {
+  if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if (Notification.permission === 'denied') return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    pushEnabled = !!sub;
+  } catch {}
+}
+
+async function togglePush() {
+  if (!('Notification' in window)) return;
+  if (pushEnabled) {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) await sub.unsubscribe();
+      await apiFetch('/api/push/subscribe', { method: 'DELETE' });
+      pushEnabled = false;
+      renderHeader();
+      toast('Notificaciones desactivadas');
+    } catch { toast('Error al desactivar'); }
+  } else {
+    try {
+      if (Notification.permission !== 'granted') {
+        const p = await Notification.requestPermission();
+        if (p !== 'granted') { toast('Permiso denegado'); return; }
+      }
+      const keyRes = await apiFetch('/api/push/key');
+      if (!keyRes.ok) { toast('Push no disponible'); return; }
+      const { publicKey } = await keyRes.json();
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
+      });
+      await apiFetch('/api/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: sub }) });
+      pushEnabled = true;
+      renderHeader();
+      toast('🔔 Notificaciones activadas');
+    } catch (e) {
+      console.error(e);
+      toast('Error al activar notificaciones');
+    }
+  }
+}
 
 /* ═══════════════════════════════════
    Groups
@@ -1392,11 +1626,22 @@ function renderLeaderboard() {
       diffHtml = `<div class="lb-diff behind">−${fmt(gap)} al líder</div>`;
     }
 
+    const reactHtml = !m.isMe ? `
+      <div class="lb-reactions">
+        ${VALID_EMOJIS.map(emoji => {
+          const r = m.reactions?.[emoji] || { count: 0, iMine: false };
+          return `<button class="lb-reaction${r.iMine ? ' mine' : ''}"
+            onclick="sendReaction('${lbGroupId}','${m.id}','${emoji}')"
+          >${emoji}${r.count > 0 ? ` ${r.count}` : ''}</button>`;
+        }).join('')}
+      </div>` : '';
+
     row.innerHTML = `
       ${rankHtml}
       <div class="lb-user">
         <div class="lb-username">${esc(m.username)}</div>
         ${m.isMe ? '<div class="lb-you">tú</div>' : ''}
+        ${reactHtml}
       </div>
       <div class="lb-stats">
         <div class="lb-hrs">${fmt(m[lbMetric])}</div>
@@ -1456,6 +1701,22 @@ function renderSubjectBoard() {
   });
 }
 
+async function sendReaction(groupId, toUserId, emoji) {
+  try {
+    const res  = await apiFetch(`/api/groups/${groupId}/reactions`, {
+      method: 'POST', body: JSON.stringify({ toUserId, emoji })
+    });
+    if (!res.ok) return;
+    // Refrescar el leaderboard para reflejar el cambio
+    const r2 = await apiFetch(`/api/groups/${groupId}/leaderboard`);
+    if (r2.ok) {
+      lbData = await r2.json();
+      if (lbMetric === 'subjects') renderSubjectBoard();
+      else renderLeaderboard();
+    }
+  } catch {}
+}
+
 document.getElementById('J_lbOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('J_lbOverlay')) closeLb();
 });
@@ -1479,7 +1740,8 @@ async function boot() {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     currentUser = payload.username;
-    await loadData();
+    await Promise.all([loadData(), loadSettings()]);
+    await initPush();
     hideAuth();
     render();
     loadGroups();
