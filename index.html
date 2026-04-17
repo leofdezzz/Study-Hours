@@ -3,25 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0c0c0c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Study Hours">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon.svg">
   <title>Study Hours</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg:       #0c0c0c;
-      --s1:       #141414;
-      --s2:       #1c1c1c;
-      --s3:       #252525;
-      --border:   #2a2a2a;
-      --text:     #ffffff;
-      --t2:       #999999;
-      --t3:       #4a4a4a;
-      --green:    #86efac;
-      --red:      #fca5a5;
+      --bg:     #0c0c0c;
+      --s1:     #141414;
+      --s2:     #1c1c1c;
+      --s3:     #252525;
+      --border: #2a2a2a;
+      --text:   #ffffff;
+      --t2:     #999999;
+      --t3:     #4a4a4a;
+      --green:  #86efac;
+      --red:    #fca5a5;
     }
 
     html { scroll-behavior: smooth; }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -30,282 +35,183 @@
       padding-bottom: 60px;
       -webkit-font-smoothing: antialiased;
     }
-
     ::-webkit-scrollbar { display: none; }
 
     /* ─── Layout ─── */
-    .wrap {
-      max-width: 460px;
-      margin: 0 auto;
-      padding: 0 18px;
-    }
+    .wrap { max-width: 460px; margin: 0 auto; padding: 0 18px; }
 
     /* ─── Header ─── */
-    .hdr {
-      padding: 52px 18px 28px;
-      max-width: 460px;
-      margin: 0 auto;
-    }
+    .hdr { padding: 52px 18px 28px; max-width: 460px; margin: 0 auto; }
     .hdr-sub {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--t3);
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      margin-bottom: 5px;
+      font-size: 11px; font-weight: 500; color: var(--t3);
+      text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 5px;
     }
-    .hdr-title {
-      font-size: 30px;
-      font-weight: 800;
-      letter-spacing: -1.2px;
+    .hdr-title { font-size: 30px; font-weight: 800; letter-spacing: -1.2px; }
+    .hdr-date  { font-size: 13px; color: var(--t2); margin-top: 5px; }
+    .hdr-user  {
+      display: none; align-items: center; gap: 8px; margin-top: 8px;
     }
-    .hdr-date {
-      font-size: 13px;
-      color: var(--t2);
-      margin-top: 5px;
+    .hdr-username { font-size: 12px; color: var(--t3); }
+    .logout-btn {
+      background: none; border: 1px solid var(--border); border-radius: 8px;
+      color: var(--t3); font-size: 11px; font-weight: 600; padding: 3px 10px;
+      cursor: pointer; transition: color .15s, border-color .15s; font-family: inherit;
     }
+    .logout-btn:hover { color: var(--t2); border-color: #383838; }
 
     /* ─── Stats Row ─── */
-    .stats-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
     .stat-card {
-      background: var(--s1);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 18px 16px;
-      position: relative;
-      overflow: hidden;
-      transition: border-color .2s;
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 20px; padding: 18px 16px;
+      position: relative; overflow: hidden; transition: border-color .2s;
     }
     .stat-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
+      content: ''; position: absolute; inset: 0;
       background: linear-gradient(145deg, rgba(255,255,255,.025) 0%, transparent 55%);
       pointer-events: none;
     }
     .stat-lbl {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--t3);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 10px;
+      font-size: 10px; font-weight: 600; color: var(--t3);
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
     }
     .stat-val {
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: -2px;
-      line-height: 1;
-      margin-bottom: 9px;
+      font-size: 32px; font-weight: 800;
+      letter-spacing: -2px; line-height: 1; margin-bottom: 9px;
     }
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 20px;
-      letter-spacing: .2px;
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 700; padding: 3px 8px;
+      border-radius: 20px; letter-spacing: .2px;
     }
-    .badge.pos  { color: var(--green); background: rgba(134,239,172,.1); }
-    .badge.neg  { color: var(--red);   background: rgba(252,165,165,.1); }
-    .badge.neu  { color: var(--t3);    background: var(--s2); }
+    .badge.pos { color: var(--green); background: rgba(134,239,172,.1); }
+    .badge.neg { color: var(--red);   background: rgba(252,165,165,.1); }
+    .badge.neu { color: var(--t3);    background: var(--s2); }
+
+    /* ─── Streak Card ─── */
+    .streak-card {
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 16px; padding: 13px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .streak-left { display: flex; align-items: center; gap: 10px; }
+    .streak-icon { font-size: 18px; line-height: 1; }
+    .streak-lbl  { font-size: 12px; font-weight: 600; color: var(--t2); }
+    .streak-sub  { font-size: 11px; color: var(--t3); margin-top: 1px; }
+    .streak-val  { font-size: 26px; font-weight: 800; letter-spacing: -1.5px; }
 
     /* ─── Chart ─── */
     .chart-card {
-      background: var(--s1);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 20px 18px 18px;
-      margin-bottom: 12px;
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 20px; padding: 20px 18px 18px; margin-bottom: 12px;
     }
     .card-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 18px;
     }
     .card-title {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--t3);
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      font-size: 10px; font-weight: 600; color: var(--t3);
+      text-transform: uppercase; letter-spacing: 1px;
     }
-    .card-sub {
-      font-size: 12px;
-      color: var(--t3);
+    .week-nav { display: flex; align-items: center; gap: 6px; }
+    .week-nav-btn {
+      width: 22px; height: 22px; border-radius: 7px;
+      background: var(--s2); border: 1px solid var(--border);
+      color: var(--t2); font-size: 13px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s; font-family: inherit;
+      padding: 0;
     }
-    .chart-area {
-      height: 90px;
-      display: flex;
-      align-items: flex-end;
-      gap: 6px;
-    }
+    .week-nav-btn:hover { background: var(--s3); color: var(--text); }
+    .week-nav-btn:disabled { opacity: .3; cursor: default; }
+    .week-label { font-size: 12px; color: var(--t3); min-width: 80px; text-align: center; }
+    .chart-area { height: 90px; display: flex; align-items: flex-end; gap: 6px; }
     .bar-col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      height: 100%;
-      gap: 7px;
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end; height: 100%; gap: 7px;
     }
     .bar {
-      width: 100%;
-      border-radius: 5px 5px 3px 3px;
-      background: var(--s3);
-      transition: height .65s cubic-bezier(.34,1.4,.64,1);
-      position: relative;
+      width: 100%; border-radius: 5px 5px 3px 3px; background: var(--s3);
+      transition: height .65s cubic-bezier(.34,1.4,.64,1); position: relative;
     }
-    .bar.active {
-      background: #fff;
-      box-shadow: 0 0 14px rgba(255,255,255,.2);
-    }
-    .bar-lbl {
-      font-size: 10px;
-      font-weight: 500;
-      color: var(--t3);
-      transition: color .2s;
-    }
+    .bar.active { background: #fff; box-shadow: 0 0 14px rgba(255,255,255,.2); }
+    .bar-lbl { font-size: 10px; font-weight: 500; color: var(--t3); transition: color .2s; }
     .bar-lbl.active { color: var(--text); }
 
     /* ─── Subjects ─── */
-    .sec-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
+    .sec-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .add-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: #fff;
-      color: #000;
-      border: none;
-      border-radius: 12px;
-      padding: 8px 14px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: -.2px;
-      transition: opacity .15s, transform .1s;
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #fff; color: #000; border: none; border-radius: 12px;
+      padding: 8px 14px; font-size: 13px; font-weight: 700;
+      cursor: pointer; letter-spacing: -.2px;
+      transition: opacity .15s, transform .1s; font-family: inherit;
     }
     .add-btn:active { transform: scale(.95); }
 
     .subjects { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 
     .sc {
-      background: var(--s1);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 15px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transition: border-color .2s;
-      position: relative;
-      overflow: hidden;
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 20px; padding: 15px 16px;
+      display: flex; align-items: center; gap: 12px;
+      transition: border-color .2s; position: relative; overflow: hidden;
       animation: si .35s cubic-bezier(.34,1.4,.64,1) both;
     }
     .sc:hover { border-color: #383838; }
-
     @keyframes si {
       from { opacity: 0; transform: translateY(14px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .sc-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--t3);
-      flex-shrink: 0;
-    }
+    .sc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .sc-info { flex: 1; min-width: 0; }
     .sc-name {
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: -.3px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 15px; font-weight: 600; letter-spacing: -.3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .sc-week {
-      font-size: 11px;
-      color: var(--t3);
-      margin-top: 2px;
-    }
+    .sc-week { font-size: 11px; color: var(--t3); margin-top: 2px; }
     .sc-today {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: -1.5px;
-      min-width: 54px;
-      text-align: center;
+      font-size: 22px; font-weight: 800; letter-spacing: -1.5px;
+      min-width: 50px; text-align: center;
     }
-    .sc-today.pop {
-      animation: pop .3s cubic-bezier(.34,1.9,.64,1);
-    }
+    .sc-today.pop { animation: pop .3s cubic-bezier(.34,1.9,.64,1); }
     @keyframes pop {
       0%   { transform: scale(1); }
       45%  { transform: scale(1.28); }
       100% { transform: scale(1); }
     }
 
-    .sc-ctrl { display: flex; gap: 6px; }
+    .sc-ctrl { display: flex; gap: 5px; }
     .hbtn {
-      width: 34px; height: 34px;
-      border-radius: 10px;
-      background: var(--s2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 18px;
-      font-weight: 200;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 34px; height: 34px; border-radius: 10px;
+      background: var(--s2); border: 1px solid var(--border);
+      color: var(--text); font-size: 16px; font-weight: 400;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
       transition: background .15s, transform .1s;
-      position: relative;
-      overflow: hidden;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
+      position: relative; overflow: hidden;
+      user-select: none; -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
     }
     .hbtn:hover { background: var(--s3); }
     .hbtn:active { transform: scale(.87); }
+    .hbtn.pomo { font-size: 17px; }
+    .hbtn.hr   { font-size: 11px; font-weight: 700; color: var(--t2); letter-spacing: -.3px; }
 
     .sc-edit {
-      opacity: 0;
-      width: 28px; height: 28px;
-      border-radius: 8px;
-      background: transparent;
-      border: none;
-      color: var(--t3);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity .2s, color .15s;
-      flex-shrink: 0;
+      opacity: 0; width: 28px; height: 28px; border-radius: 8px;
+      background: transparent; border: none; color: var(--t3);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: opacity .2s, color .15s; flex-shrink: 0;
     }
     .sc:hover .sc-edit { opacity: 1; }
     .sc-edit:hover { color: var(--t2); }
 
-    /* Floating +/- label */
+    /* Floating label */
     .float-lbl {
-      position: absolute;
-      right: 58px;
-      font-size: 13px;
-      font-weight: 700;
-      pointer-events: none;
-      opacity: 0;
-      transform: translateY(0);
+      position: absolute; right: 68px; font-size: 12px; font-weight: 700;
+      pointer-events: none; opacity: 0; transform: translateY(0);
       animation: floatUp .7s cubic-bezier(.25,.46,.45,.94) forwards;
     }
     .float-lbl.pos { color: var(--green); }
@@ -318,124 +224,133 @@
 
     /* ─── Total ─── */
     .total-card {
-      background: var(--s1);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 20px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 20px; padding: 20px; display: flex;
+      align-items: center; justify-content: space-between;
     }
-    .total-info .lbl  { font-size: 13px; font-weight: 500; color: var(--t2); }
-    .total-info .sub  { font-size: 11px; color: var(--t3); margin-top: 2px; }
-    .total-val {
-      font-size: 38px;
-      font-weight: 800;
-      letter-spacing: -2.5px;
-    }
+    .total-info .lbl { font-size: 13px; font-weight: 500; color: var(--t2); }
+    .total-info .sub { font-size: 11px; color: var(--t3); margin-top: 2px; }
+    .total-val { font-size: 38px; font-weight: 800; letter-spacing: -2.5px; }
 
     /* ─── Empty ─── */
-    .empty {
-      text-align: center;
-      padding: 36px 16px;
-    }
-    .empty-icon {
-      font-size: 30px;
-      opacity: .25;
-      margin-bottom: 10px;
-    }
-    .empty-txt {
-      font-size: 13px;
-      color: var(--t3);
-      line-height: 1.6;
-    }
+    .empty { text-align: center; padding: 36px 16px; }
+    .empty-icon { font-size: 30px; opacity: .25; margin-bottom: 10px; }
+    .empty-txt  { font-size: 13px; color: var(--t3); line-height: 1.6; }
 
     /* ─── Modal / Sheet ─── */
     .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.78);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      z-index: 200;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s;
-      display: flex;
-      align-items: flex-end;
+      position: fixed; inset: 0; background: rgba(0,0,0,.78);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      z-index: 200; opacity: 0; pointer-events: none;
+      transition: opacity .25s; display: flex; align-items: flex-end;
     }
     .overlay.open { opacity: 1; pointer-events: all; }
-
     .sheet {
-      width: 100%;
-      max-width: 460px;
-      margin: 0 auto;
-      background: var(--s1);
-      border: 1px solid var(--border);
-      border-bottom: none;
-      border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 460px; margin: 0 auto;
+      background: var(--s1); border: 1px solid var(--border);
+      border-bottom: none; border-radius: 24px 24px 0 0;
       padding: 12px 22px 52px;
       transform: translateY(105%);
       transition: transform .42s cubic-bezier(.34,1.1,.64,1);
     }
     .overlay.open .sheet { transform: translateY(0); }
-
     .sheet-handle {
-      width: 36px; height: 4px;
-      background: var(--s3);
-      border-radius: 2px;
-      margin: 8px auto 26px;
+      width: 36px; height: 4px; background: var(--s3);
+      border-radius: 2px; margin: 8px auto 26px;
     }
     .sheet-title {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -.6px;
-      margin-bottom: 20px;
+      font-size: 20px; font-weight: 800;
+      letter-spacing: -.6px; margin-bottom: 20px;
     }
     .txt-input {
-      width: 100%;
-      background: var(--s2);
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      padding: 14px 16px;
-      color: var(--text);
-      font-size: 15px;
-      font-weight: 500;
-      outline: none;
-      transition: border-color .2s;
-      letter-spacing: -.2px;
-      margin-bottom: 16px;
+      width: 100%; background: var(--s2); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 14px 16px; color: var(--text);
+      font-size: 15px; font-weight: 500; outline: none;
+      transition: border-color .2s; letter-spacing: -.2px; margin-bottom: 16px;
+      font-family: inherit;
     }
     .txt-input::placeholder { color: var(--t3); }
     .txt-input:focus { border-color: #555; }
 
+    /* Color picker */
+    .color-row { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .color-swatch {
+      width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: transform .15s, border-color .15s;
+      flex-shrink: 0;
+    }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.selected { border-color: #fff; transform: scale(1.15); }
+
     .sheet-acts { display: flex; gap: 10px; }
     .sbtn {
-      flex: 1;
-      padding: 14px;
-      border-radius: 14px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      border: 1.5px solid transparent;
-      letter-spacing: -.3px;
-      transition: opacity .15s, transform .1s;
+      flex: 1; padding: 14px; border-radius: 14px; font-size: 15px;
+      font-weight: 700; cursor: pointer; border: 1.5px solid transparent;
+      letter-spacing: -.3px; transition: opacity .15s, transform .1s;
+      font-family: inherit;
     }
     .sbtn:active { transform: scale(.97); }
-    .sbtn.primary { background: #fff; color: #000; }
+    .sbtn.primary   { background: #fff; color: #000; }
     .sbtn.secondary { background: transparent; color: var(--t2); border-color: var(--border); }
-    .sbtn.danger { background: transparent; color: var(--red); border-color: rgba(252,165,165,.2); }
+    .sbtn.danger    { background: transparent; color: var(--red); border-color: rgba(252,165,165,.2); }
 
     /* ─── Ripple ─── */
     .ripple {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255,255,255,.18);
-      transform: scale(0);
-      animation: rpl .5s linear forwards;
-      pointer-events: none;
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,.18); transform: scale(0);
+      animation: rpl .5s linear forwards; pointer-events: none;
     }
     @keyframes rpl { to { transform: scale(5); opacity: 0; } }
+
+    /* ─── Toast ─── */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(70px);
+      background: #fff; color: #000; font-size: 13px; font-weight: 700;
+      padding: 10px 20px; border-radius: 100px; opacity: 0;
+      transition: transform .3s cubic-bezier(.34,1.4,.64,1), opacity .3s;
+      z-index: 300; pointer-events: none; white-space: nowrap; letter-spacing: -.2px;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ─── Auth Screen ─── */
+    .auth-screen {
+      position: fixed; inset: 0; background: var(--bg); z-index: 500;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 24px; transition: opacity .3s;
+    }
+    .auth-screen.hidden { opacity: 0; pointer-events: none; }
+    .auth-card {
+      width: 100%; max-width: 360px; background: var(--s1);
+      border: 1px solid var(--border); border-radius: 24px; padding: 28px 24px 32px;
+    }
+    .auth-logo    { font-size: 22px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; }
+    .auth-tagline { font-size: 13px; color: var(--t2); margin-bottom: 26px; }
+    .auth-tabs {
+      display: flex; background: var(--s2); border-radius: 12px;
+      padding: 3px; margin-bottom: 20px; gap: 3px;
+    }
+    .auth-tab {
+      flex: 1; padding: 8px; border-radius: 9px; border: none;
+      background: transparent; color: var(--t3); font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: background .15s, color .15s; font-family: inherit;
+    }
+    .auth-tab.active { background: var(--s3); color: var(--text); }
+    .auth-error {
+      font-size: 12px; color: var(--red); background: rgba(252,165,165,.1);
+      border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
+      display: none; line-height: 1.4;
+    }
+    .auth-error.show { display: block; }
+    .auth-btn {
+      width: 100%; padding: 14px; border-radius: 14px;
+      background: #fff; color: #000; border: none;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      letter-spacing: -.3px; transition: opacity .15s, transform .1s;
+      margin-top: 4px; font-family: inherit;
+    }
+    .auth-btn:active  { transform: scale(.98); }
+    .auth-btn:disabled { opacity: .5; cursor: default; transform: none; }
 
     /* ─── Responsive ─── */
     @media (max-width: 380px) {
@@ -444,56 +359,48 @@
       .hdr-title { font-size: 26px; }
       .stat-val { font-size: 26px; }
       .total-val { font-size: 32px; }
-      .sc-today { font-size: 20px; min-width: 46px; }
-      .sc-name { font-size: 14px; }
-      .hbtn { width: 30px; height: 30px; font-size: 16px; }
+      .sc-today { font-size: 18px; min-width: 42px; }
+      .sc-name  { font-size: 14px; }
+      .hbtn { width: 30px; height: 30px; font-size: 14px; }
+      .hbtn.hr { font-size: 10px; }
       .stat-card { padding: 14px 12px; }
-      .sc { padding: 13px 13px; gap: 9px; }
+      .sc { padding: 13px 13px; gap: 8px; }
       .chart-area { height: 75px; }
     }
-
     @media (max-width: 320px) {
       .stats-row { grid-template-columns: 1fr; }
       .sc-today { display: none; }
     }
-
     @media (min-width: 600px) {
-      .hdr { padding: 60px 0 28px; max-width: 460px; margin: 0 auto; }
-      body { padding-bottom: 80px; }
-    }
-
-    /* ─── Toast ─── */
-    .toast {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(70px);
-      background: #fff;
-      color: #000;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 10px 20px;
-      border-radius: 100px;
-      opacity: 0;
-      transition: transform .3s cubic-bezier(.34,1.4,.64,1), opacity .3s;
-      z-index: 300;
-      pointer-events: none;
-      white-space: nowrap;
-      letter-spacing: -.2px;
-    }
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
+      .hdr  { padding: 60px 0 28px; max-width: 460px; margin: 0 auto; }
+      body  { padding-bottom: 80px; }
     }
   </style>
 </head>
 <body>
+
+<!-- Auth Screen -->
+<div class="auth-screen" id="J_auth">
+  <div class="auth-card">
+    <div class="auth-logo">Study Hours</div>
+    <div class="auth-tagline">Seguimiento de horas de estudio</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="J_tabLogin"    onclick="switchAuthTab('login')">Entrar</button>
+      <button class="auth-tab"        id="J_tabRegister" onclick="switchAuthTab('register')">Registrarse</button>
+    </div>
+    <div class="auth-error" id="J_authError"></div>
+    <input type="text"     class="txt-input" id="J_authUser" placeholder="Usuario" autocomplete="username" autocapitalize="none" spellcheck="false">
+    <input type="password" class="txt-input" id="J_authPass" placeholder="Contraseña" autocomplete="current-password">
+    <button class="auth-btn" id="J_authSubmit" onclick="doAuth()">Entrar</button>
+  </div>
+</div>
 
 <!-- Header -->
 <div class="hdr">
   <div class="hdr-sub">Seguimiento</div>
   <div class="hdr-title">Study Hours</div>
   <div class="hdr-date" id="J_date"></div>
+  <div class="hdr-user" id="J_userInfo"></div>
 </div>
 
 <div class="wrap">
@@ -506,17 +413,33 @@
       <div class="badge neu" id="J_todayBadge">—</div>
     </div>
     <div class="stat-card">
-      <div class="stat-lbl">Esta semana</div>
+      <div class="stat-lbl" id="J_weekLbl">Esta semana</div>
       <div class="stat-val" id="J_weekVal">0h</div>
       <div class="badge neu" id="J_weekBadge">—</div>
     </div>
   </div>
 
+  <!-- Streak -->
+  <div class="streak-card" id="J_streakCard">
+    <div class="streak-left">
+      <div class="streak-icon" id="J_streakIcon">—</div>
+      <div>
+        <div class="streak-lbl" id="J_streakLbl">Sin racha activa</div>
+        <div class="streak-sub" id="J_streakSub">Estudia hoy para empezar</div>
+      </div>
+    </div>
+    <div class="streak-val" id="J_streakVal"></div>
+  </div>
+
   <!-- Chart -->
   <div class="chart-card">
     <div class="card-head">
-      <span class="card-title">Semana actual</span>
-      <span class="card-sub" id="J_weekRange"></span>
+      <span class="card-title">Semana</span>
+      <div class="week-nav">
+        <button class="week-nav-btn" id="J_prevWeek" onclick="shiftWeek(-1)" title="Semana anterior">‹</button>
+        <span class="week-label" id="J_weekRange"></span>
+        <button class="week-nav-btn" id="J_nextWeek" onclick="shiftWeek(1)" title="Semana siguiente" disabled>›</button>
+      </div>
     </div>
     <div class="chart-area" id="J_chart"></div>
   </div>
@@ -549,7 +472,9 @@
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title" id="J_sheetTitle">Nueva asignatura</div>
-    <input type="text" class="txt-input" id="J_input" placeholder="Nombre de la asignatura" maxlength="40" autocomplete="off" spellcheck="false">
+    <input type="text" class="txt-input" id="J_input" placeholder="Nombre de la asignatura"
+           maxlength="40" autocomplete="off" spellcheck="false">
+    <div class="color-row" id="J_colorRow"></div>
     <div class="sheet-acts" id="J_sheetActs"></div>
   </div>
 </div>
@@ -559,16 +484,131 @@
 
 <script>
 /* ═══════════════════════════════════
+   Constants
+═══════════════════════════════════ */
+const COLORS = ['#a78bfa','#60a5fa','#34d399','#fbbf24','#f87171','#f472b6','#22d3ee','#fb923c'];
+const POMO   = 25 / 60; // 0.4166... hours
+
+/* ═══════════════════════════════════
+   Auth
+═══════════════════════════════════ */
+let currentUser = null;
+let authMode    = 'login';
+
+function getToken()  { return localStorage.getItem('sh_token'); }
+function setToken(t) { localStorage.setItem('sh_token', t); }
+function clearToken(){ localStorage.removeItem('sh_token'); }
+
+function showAuth() { document.getElementById('J_auth').classList.remove('hidden'); }
+function hideAuth() { document.getElementById('J_auth').classList.add('hidden'); }
+
+function switchAuthTab(mode) {
+  authMode = mode;
+  document.getElementById('J_tabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('J_tabRegister').classList.toggle('active', mode === 'register');
+  document.getElementById('J_authSubmit').textContent = mode === 'login' ? 'Entrar' : 'Crear cuenta';
+  document.getElementById('J_authPass').autocomplete  = mode === 'login' ? 'current-password' : 'new-password';
+  document.getElementById('J_authError').classList.remove('show');
+}
+
+async function doAuth() {
+  const username = document.getElementById('J_authUser').value.trim();
+  const password = document.getElementById('J_authPass').value;
+  const errEl    = document.getElementById('J_authError');
+  const btn      = document.getElementById('J_authSubmit');
+
+  errEl.classList.remove('show');
+  if (!username || !password) {
+    errEl.textContent = 'Completa todos los campos';
+    errEl.classList.add('show');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try {
+    const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/register';
+    const res  = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const json = await res.json();
+
+    if (!res.ok) {
+      errEl.textContent = json.error || 'Error desconocido';
+      errEl.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = authMode === 'login' ? 'Entrar' : 'Crear cuenta';
+      return;
+    }
+
+    setToken(json.token);
+    currentUser = json.username;
+    await loadData();
+    hideAuth();
+    render();
+
+  } catch {
+    errEl.textContent = 'Error de conexión con el servidor';
+    errEl.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = authMode === 'login' ? 'Entrar' : 'Crear cuenta';
+  }
+}
+
+function logout() {
+  clearToken();
+  currentUser = null;
+  data = { subjects: [], logs: {} };
+  weekOffset = 0;
+  const userEl = document.getElementById('J_userInfo');
+  userEl.style.display = 'none';
+  userEl.innerHTML = '';
+  showAuth();
+}
+
+document.getElementById('J_authUser').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('J_authPass').focus();
+});
+document.getElementById('J_authPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doAuth();
+});
+
+/* ═══════════════════════════════════
    Data layer
 ═══════════════════════════════════ */
-const KEY = 'sh_v2';
-function loadData() {
-  try { return JSON.parse(localStorage.getItem(KEY)) || {subjects:[],logs:{}}; }
-  catch { return {subjects:[],logs:{}}; }
-}
-function persist() { localStorage.setItem(KEY, JSON.stringify(data)); }
-let data = loadData();
+let data = { subjects: [], logs: {} };
 let editId = null;
+let weekOffset = 0;
+
+async function apiFetch(path, opts = {}) {
+  const token = getToken();
+  const config = {
+    method: opts.method || 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    }
+  };
+  if (opts.body) config.body = opts.body;
+  const res = await fetch(path, config);
+  if (res.status === 401) { clearToken(); showAuth(); throw new Error('No autorizado'); }
+  return res;
+}
+
+async function loadData() {
+  const res = await apiFetch('/api/data');
+  if (res.ok) data = await res.json();
+}
+
+function persist() {
+  apiFetch('/api/data', {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }).catch(() => {});
+}
 
 /* ═══════════════════════════════════
    Date helpers
@@ -577,21 +617,50 @@ function dk(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function today() { return dk(new Date()); }
-function weekOf(offset=0) {
+
+function weekOf(off = weekOffset) {
   const t = new Date(), dow = (t.getDay()+6)%7;
   const mon = new Date(t);
-  mon.setDate(t.getDate() - dow + offset*7);
-  return Array.from({length:7},(_,i)=>{ const d=new Date(mon); d.setDate(mon.getDate()+i); return d; });
+  mon.setDate(t.getDate() - dow + off * 7);
+  return Array.from({length:7}, (_,i) => {
+    const d = new Date(mon);
+    d.setDate(mon.getDate() + i);
+    return d;
+  });
 }
+
 function daySum(key) {
   const d = data.logs[key];
-  return d ? Object.values(d).reduce((s,v)=>s+v,0) : 0;
+  return d ? Object.values(d).reduce((s,v) => s+v, 0) : 0;
 }
-function weekSum(off=0) { return weekOf(off).reduce((s,d)=>s+daySum(dk(d)),0); }
+function weekSum(off = weekOffset) { return weekOf(off).reduce((s,d) => s + daySum(dk(d)), 0); }
 function subDay(sid)  { return (data.logs[today()]||{})[sid]||0; }
-function subWeek(sid) { return weekOf().reduce((s,d)=>s+((data.logs[dk(d)]||{})[sid]||0),0); }
-function subAll(sid)  { return Object.values(data.logs).reduce((s,d)=>s+(d[sid]||0),0); }
-function grandTotal() { return data.subjects.reduce((s,sub)=>s+subAll(sub.id),0); }
+function subWeek(sid) { return weekOf(weekOffset).reduce((s,d) => s+((data.logs[dk(d)]||{})[sid]||0), 0); }
+function subAll(sid)  { return Object.values(data.logs).reduce((s,d) => s+(d[sid]||0), 0); }
+function grandTotal() { return data.subjects.reduce((s,sub) => s + subAll(sub.id), 0); }
+
+function calcStreak() {
+  const d = new Date();
+  let streak = 0;
+  // If no hours today, check from yesterday
+  if (daySum(dk(d)) === 0) d.setDate(d.getDate() - 1);
+  while (daySum(dk(d)) > 0) {
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
+/* ═══════════════════════════════════
+   Week navigation
+═══════════════════════════════════ */
+function shiftWeek(dir) {
+  const next = weekOffset + dir;
+  if (next > 0) return;
+  weekOffset = next;
+  document.getElementById('J_nextWeek').disabled = (weekOffset === 0);
+  render();
+}
 
 /* ═══════════════════════════════════
    Hour management
@@ -599,7 +668,7 @@ function grandTotal() { return data.subjects.reduce((s,sub)=>s+subAll(sub.id),0)
 function adjust(sid, delta) {
   const k = today();
   if (!data.logs[k]) data.logs[k] = {};
-  const next = Math.max(0, +((data.logs[k][sid]||0) + delta).toFixed(2));
+  const next = Math.max(0, +((data.logs[k][sid]||0) + delta).toFixed(4));
   if (next === 0) delete data.logs[k][sid];
   else data.logs[k][sid] = next;
   if (!Object.keys(data.logs[k]).length) delete data.logs[k];
@@ -611,16 +680,18 @@ function adjust(sid, delta) {
 ═══════════════════════════════════ */
 function fmt(h) {
   if (h === 0) return '0h';
-  const hr = Math.floor(h), mn = Math.round((h-hr)*60);
-  if (hr === 0) return `${mn}m`;
-  if (mn === 0) return `${hr}h`;
+  const hr = Math.floor(h), mn = Math.round((h - hr) * 60);
+  if (mn === 60) return `${hr+1}h`;
+  if (hr === 0)  return `${mn}m`;
+  if (mn === 0)  return `${hr}h`;
   return `${hr}h ${mn}m`;
 }
+
 function pct(now, prev) {
-  if (now===0 && prev===0) return {txt:'Sin cambios', cls:'neu'};
-  if (prev===0) return {txt:`+${fmt(now)} nuevo`, cls:'pos'};
-  const p = Math.round((now-prev)/prev*100);
-  return {txt:`${p>=0?'+':''}${p}%`, cls: p>0?'pos':p<0?'neg':'neu'};
+  if (now===0 && prev===0) return { txt:'Sin cambios', cls:'neu' };
+  if (prev===0)            return { txt:`+${fmt(now)} nuevo`, cls:'pos' };
+  const p = Math.round((now - prev) / prev * 100);
+  return { txt:`${p>=0?'+':''}${p}%`, cls: p>0?'pos':p<0?'neg':'neu' };
 }
 
 /* ═══════════════════════════════════
@@ -629,22 +700,32 @@ function pct(now, prev) {
 function render() {
   renderHeader();
   renderStats();
+  renderStreak();
   renderChart();
   renderSubjects();
   renderTotal();
 }
 
 function renderHeader() {
-  const D=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const M=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const n=new Date();
-  document.getElementById('J_date').textContent=`${D[n.getDay()]}, ${n.getDate()} de ${M[n.getMonth()]}`;
+  const D = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const M = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const n = new Date();
+  document.getElementById('J_date').textContent = `${D[n.getDay()]}, ${n.getDate()} de ${M[n.getMonth()]}`;
+
+  const userEl = document.getElementById('J_userInfo');
+  if (currentUser) {
+    userEl.innerHTML = `
+      <span class="hdr-username">${esc(currentUser)}</span>
+      <button class="logout-btn" onclick="logout()">Salir</button>`;
+    userEl.style.display = 'flex';
+  }
 }
 
 function renderStats() {
-  const tod = daySum(today());
+  const tod  = daySum(today());
   const yest = daySum(dk(new Date(Date.now()-86400000)));
-  const wk = weekSum(0), lwk = weekSum(-1);
+  const wk   = weekSum(weekOffset);
+  const lwk  = weekSum(weekOffset - 1);
 
   document.getElementById('J_todayVal').textContent = fmt(tod);
   document.getElementById('J_weekVal').textContent  = fmt(wk);
@@ -655,46 +736,73 @@ function renderStats() {
   tb.className = `badge ${tc.cls}`;
 
   const wb = document.getElementById('J_weekBadge');
-  wb.textContent = `${wc.txt} vs sem. ant.`;
+  wb.textContent = weekOffset === 0
+    ? `${wc.txt} vs sem. ant.`
+    : `${wc.txt} vs anterior`;
   wb.className = `badge ${wc.cls}`;
 
-  const days = weekOf();
-  const Sm=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  document.getElementById('J_weekRange').textContent =
-    `${days[0].getDate()} – ${days[6].getDate()} ${Sm[days[6].getMonth()]}`;
+  document.getElementById('J_weekLbl').textContent =
+    weekOffset === 0 ? 'Esta semana' :
+    weekOffset === -1 ? 'Sem. anterior' :
+    `Hace ${Math.abs(weekOffset)} sem.`;
+}
+
+function renderStreak() {
+  const streak = calcStreak();
+  const icon   = document.getElementById('J_streakIcon');
+  const lbl    = document.getElementById('J_streakLbl');
+  const sub    = document.getElementById('J_streakSub');
+  const val    = document.getElementById('J_streakVal');
+
+  if (streak === 0) {
+    icon.textContent = '—';
+    lbl.textContent  = 'Sin racha activa';
+    sub.textContent  = 'Estudia hoy para empezar';
+    val.textContent  = '';
+  } else {
+    icon.textContent = '🔥';
+    lbl.textContent  = streak === 1 ? '1 día de racha' : `${streak} días de racha`;
+    sub.textContent  = streak >= 7 ? '¡Semana completa!' :
+                       streak >= 3 ? '¡Sigue así!' : 'Buen comienzo';
+    val.textContent  = `${streak}`;
+  }
 }
 
 function renderChart() {
   const cont = document.getElementById('J_chart');
-  const LBL = ['L','M','X','J','V','S','D'];
-  const days = weekOf();
+  const LBL  = ['L','M','X','J','V','S','D'];
+  const days = weekOf(weekOffset);
   const tok  = today();
-  const vals = days.map(d=>daySum(dk(d)));
+  const vals = days.map(d => daySum(dk(d)));
   const mx   = Math.max(...vals, 0.5);
 
-  cont.innerHTML='';
-  days.forEach((d,i)=>{
-    const isT = dk(d)===tok;
+  const Sm = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  document.getElementById('J_weekRange').textContent =
+    `${days[0].getDate()} – ${days[6].getDate()} ${Sm[days[6].getMonth()]}`;
+
+  cont.innerHTML = '';
+  days.forEach((d, i) => {
+    const isT = dk(d) === tok;
     const v   = vals[i];
-    const hp  = v === 0 ? 0 : Math.max(v/mx*85, 5);
+    const hp  = v === 0 ? 0 : Math.max(v / mx * 85, 5);
 
     const col = document.createElement('div');
     col.className = 'bar-col';
 
     const bar = document.createElement('div');
-    bar.className = `bar${isT?' active':''}`;
+    bar.className = `bar${isT ? ' active' : ''}`;
     bar.style.height = '0%';
-    if(v>0) bar.title = fmt(v);
+    if (v > 0) bar.title = fmt(v);
 
     const lbl = document.createElement('div');
-    lbl.className = `bar-lbl${isT?' active':''}`;
+    lbl.className = `bar-lbl${isT ? ' active' : ''}`;
     lbl.textContent = LBL[i];
 
     col.appendChild(bar);
     col.appendChild(lbl);
     cont.appendChild(col);
 
-    setTimeout(()=>{ bar.style.height=`${hp}%`; }, i*45);
+    setTimeout(() => { bar.style.height = `${hp}%`; }, i * 45);
   });
 }
 
@@ -716,13 +824,18 @@ function renderSubjects() {
   const seen = new Set();
   data.subjects.forEach((sub, idx) => {
     seen.add(sub.id);
-    const tod = subDay(sub.id);
-    const wk  = subWeek(sub.id);
-    let card  = list.querySelector(`[data-sid="${sub.id}"]`);
+    const tod   = subDay(sub.id);
+    const wk    = subWeek(sub.id);
+    const color = sub.color || COLORS[0];
+    let card    = list.querySelector(`[data-sid="${sub.id}"]`);
 
     if (card) {
+      card.querySelector('.sc-dot').style.background = color;
       card.querySelector('.sc-name').textContent = sub.name;
-      card.querySelector('.sc-week').textContent = `${fmt(wk)} esta semana`;
+      card.querySelector('.sc-week').textContent =
+        weekOffset === 0
+          ? `${fmt(wk)} esta semana`
+          : `${fmt(wk)} esa semana`;
       const hEl = card.querySelector('.sc-today');
       if (hEl.textContent !== fmt(tod)) {
         hEl.textContent = fmt(tod);
@@ -734,17 +847,18 @@ function renderSubjects() {
       card = document.createElement('div');
       card.className = 'sc';
       card.dataset.sid = sub.id;
-      card.style.animationDelay = `${idx*50}ms`;
+      card.style.animationDelay = `${idx * 50}ms`;
       card.innerHTML = `
-        <div class="sc-dot"></div>
+        <div class="sc-dot" style="background:${color}"></div>
         <div class="sc-info">
           <div class="sc-name">${esc(sub.name)}</div>
-          <div class="sc-week">${fmt(wk)} esta semana</div>
+          <div class="sc-week">${fmt(wk)} ${weekOffset === 0 ? 'esta semana' : 'esa semana'}</div>
         </div>
         <div class="sc-today">${fmt(tod)}</div>
         <div class="sc-ctrl">
-          <button class="hbtn" data-op="m" aria-label="Restar 1 hora">−</button>
-          <button class="hbtn" data-op="p" aria-label="Sumar 1 hora">+</button>
+          <button class="hbtn" data-op="m"    aria-label="−25 min">−</button>
+          <button class="hbtn pomo" data-op="p" aria-label="+25 min (pomodoro)">🍅</button>
+          <button class="hbtn hr"  data-op="h"  aria-label="+1 hora">+1h</button>
         </div>
         <button class="sc-edit" aria-label="Editar asignatura">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -755,10 +869,13 @@ function renderSubjects() {
 
       card.querySelectorAll('.hbtn').forEach(btn => {
         btn.addEventListener('click', e => {
-          const sid   = card.dataset.sid;
-          const delta = btn.dataset.op === 'p' ? 1 : -1;
-          const cur   = subDay(sid);
-          if (delta === -1 && cur === 0) return;
+          const sid = card.dataset.sid;
+          let delta;
+          if      (btn.dataset.op === 'p') delta = +POMO;
+          else if (btn.dataset.op === 'h') delta = 1;
+          else                              delta = -POMO;
+
+          if (delta < 0 && subDay(sid) < 0.001) return;
           ripple(btn, e);
           floatLabel(card, delta);
           adjust(sid, delta);
@@ -767,15 +884,14 @@ function renderSubjects() {
       });
 
       card.querySelector('.sc-edit').addEventListener('click', () => {
-        const s = data.subjects.find(s=>s.id===sub.id);
-        if (s) openEdit(s.id, s.name);
+        const s = data.subjects.find(s => s.id === sub.id);
+        if (s) openEdit(s.id, s.name, s.color || COLORS[0]);
       });
 
       list.appendChild(card);
     }
   });
 
-  // Remove orphaned cards
   list.querySelectorAll('[data-sid]').forEach(el => {
     if (!seen.has(el.dataset.sid)) el.remove();
   });
@@ -789,30 +905,32 @@ function renderTotal() {
    UI helpers
 ═══════════════════════════════════ */
 function esc(s) {
-  const d=document.createElement('div');
+  const d = document.createElement('div');
   d.appendChild(document.createTextNode(s));
   return d.innerHTML;
 }
 
 function ripple(el, e) {
-  const r = document.createElement('span');
+  const r  = document.createElement('span');
   r.className = 'ripple';
   const rc = el.getBoundingClientRect();
   const sz = Math.max(rc.width, rc.height);
-  r.style.cssText=`width:${sz}px;height:${sz}px;left:${e.clientX-rc.left-sz/2}px;top:${e.clientY-rc.top-sz/2}px`;
+  r.style.cssText = `width:${sz}px;height:${sz}px;left:${e.clientX-rc.left-sz/2}px;top:${e.clientY-rc.top-sz/2}px`;
   el.appendChild(r);
-  r.addEventListener('animationend',()=>r.remove());
+  r.addEventListener('animationend', () => r.remove());
 }
 
 function floatLabel(card, delta) {
   const lbl = document.createElement('span');
-  lbl.className = `float-lbl ${delta>0?'pos':'neg'}`;
-  lbl.textContent = delta>0 ? '+1h' : '−1h';
+  lbl.className = `float-lbl ${delta > 0 ? 'pos' : 'neg'}`;
+  lbl.textContent = delta > 0
+    ? (Math.abs(delta) < 1 ? '+25m' : '+1h')
+    : '−25m';
   const ctrl = card.querySelector('.sc-ctrl');
   ctrl.style.position = 'relative';
   lbl.style.top = '-8px';
   ctrl.appendChild(lbl);
-  lbl.addEventListener('animationend',()=>lbl.remove());
+  lbl.addEventListener('animationend', () => lbl.remove());
 }
 
 let toastT;
@@ -821,7 +939,30 @@ function toast(msg) {
   clearTimeout(toastT);
   el.textContent = msg;
   el.classList.add('show');
-  toastT = setTimeout(()=>el.classList.remove('show'), 2200);
+  toastT = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* ═══════════════════════════════════
+   Color picker
+═══════════════════════════════════ */
+let selectedColor = COLORS[0];
+
+function buildColorPicker(current = COLORS[0]) {
+  selectedColor = current;
+  const row = document.getElementById('J_colorRow');
+  row.innerHTML = '';
+  COLORS.forEach(c => {
+    const sw = document.createElement('div');
+    sw.className  = `color-swatch${c === current ? ' selected' : ''}`;
+    sw.style.background = c;
+    sw.dataset.color = c;
+    sw.addEventListener('click', () => {
+      row.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+      sw.classList.add('selected');
+      selectedColor = c;
+    });
+    row.appendChild(sw);
+  });
 }
 
 /* ═══════════════════════════════════
@@ -831,6 +972,7 @@ function openAdd() {
   editId = null;
   document.getElementById('J_sheetTitle').textContent = 'Nueva asignatura';
   document.getElementById('J_input').value = '';
+  buildColorPicker(COLORS[0]);
   document.getElementById('J_sheetActs').innerHTML = `
     <button class="sbtn secondary" id="J_cancel">Cancelar</button>
     <button class="sbtn primary"   id="J_save">Guardar</button>`;
@@ -838,34 +980,35 @@ function openAdd() {
   showSheet();
 }
 
-function openEdit(id, name) {
+function openEdit(id, name, color) {
   editId = id;
   document.getElementById('J_sheetTitle').textContent = 'Editar asignatura';
   document.getElementById('J_input').value = name;
+  buildColorPicker(color);
   document.getElementById('J_sheetActs').innerHTML = `
-    <button class="sbtn danger"    id="J_del">Eliminar</button>
-    <button class="sbtn primary"   id="J_save">Guardar</button>`;
+    <button class="sbtn danger"  id="J_del">Eliminar</button>
+    <button class="sbtn primary" id="J_save">Guardar</button>`;
   bindSheet();
   showSheet();
 }
 
 function bindSheet() {
-  const save = document.getElementById('J_save');
+  const save   = document.getElementById('J_save');
   const cancel = document.getElementById('J_cancel');
-  const del  = document.getElementById('J_del');
-  if(save)   save.addEventListener('click', doSave);
-  if(cancel) cancel.addEventListener('click', hideSheet);
-  if(del)    del.addEventListener('click', doDelete);
+  const del    = document.getElementById('J_del');
+  if (save)   save.addEventListener('click', doSave);
+  if (cancel) cancel.addEventListener('click', hideSheet);
+  if (del)    del.addEventListener('click', doDelete);
 }
 
 function doSave() {
   const name = document.getElementById('J_input').value.trim();
   if (!name) { document.getElementById('J_input').focus(); return; }
   if (editId) {
-    const s = data.subjects.find(s=>s.id===editId);
-    if (s) { s.name=name; persist(); }
+    const s = data.subjects.find(s => s.id === editId);
+    if (s) { s.name = name; s.color = selectedColor; persist(); }
   } else {
-    data.subjects.push({id:`${Date.now()}`, name});
+    data.subjects.push({ id: `${Date.now()}`, name, color: selectedColor });
     persist();
   }
   hideSheet();
@@ -875,10 +1018,10 @@ function doSave() {
 
 function doDelete() {
   if (!confirm('¿Eliminar esta asignatura?\nSe perderán todos sus registros.')) return;
-  data.subjects = data.subjects.filter(s=>s.id!==editId);
-  Object.keys(data.logs).forEach(k=>{
+  data.subjects = data.subjects.filter(s => s.id !== editId);
+  Object.keys(data.logs).forEach(k => {
     delete data.logs[k][editId];
-    if(!Object.keys(data.logs[k]).length) delete data.logs[k];
+    if (!Object.keys(data.logs[k]).length) delete data.logs[k];
   });
   persist();
   hideSheet();
@@ -888,7 +1031,7 @@ function doDelete() {
 
 function showSheet() {
   document.getElementById('J_overlay').classList.add('open');
-  setTimeout(()=>document.getElementById('J_input').focus(), 440);
+  setTimeout(() => document.getElementById('J_input').focus(), 440);
 }
 function hideSheet() {
   document.getElementById('J_overlay').classList.remove('open');
@@ -898,18 +1041,43 @@ function hideSheet() {
    Events
 ═══════════════════════════════════ */
 document.getElementById('J_addBtn').addEventListener('click', openAdd);
-document.getElementById('J_overlay').addEventListener('click', e=>{
-  if(e.target===document.getElementById('J_overlay')) hideSheet();
+document.getElementById('J_overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('J_overlay')) hideSheet();
 });
-document.getElementById('J_input').addEventListener('keydown', e=>{
-  if(e.key==='Enter') doSave();
-  if(e.key==='Escape') hideSheet();
+document.getElementById('J_input').addEventListener('keydown', e => {
+  if (e.key === 'Enter')  doSave();
+  if (e.key === 'Escape') hideSheet();
 });
+
+/* ═══════════════════════════════════
+   Service Worker
+═══════════════════════════════════ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+  });
+}
 
 /* ═══════════════════════════════════
    Boot
 ═══════════════════════════════════ */
-render();
+async function boot() {
+  renderHeader();
+  const token = getToken();
+  if (!token) { showAuth(); return; }
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    currentUser = payload.username;
+    await loadData();
+    hideAuth();
+    render();
+  } catch {
+    clearToken();
+    showAuth();
+  }
+}
+
+boot();
 </script>
 </body>
 </html>
