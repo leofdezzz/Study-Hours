@@ -61,15 +61,29 @@ function currentWeekKeys() {
     return fmtDate(d);
   });
 }
-function computeStats(logsJson) {
-  const logs  = JSON.parse(logsJson || '{}');
-  const today = fmtDate(new Date());
-  const wKeys = currentWeekKeys();
-  const sum   = obj => Object.values(obj||{}).reduce((s,v)=>s+v, 0);
+function computeStats(logsJson, subjectsJson) {
+  const logs     = JSON.parse(logsJson     || '{}');
+  const subjects = JSON.parse(subjectsJson || '[]');
+  const today    = fmtDate(new Date());
+  const wKeys    = currentWeekKeys();
+  const sum      = obj => Object.values(obj||{}).reduce((s,v)=>s+v, 0);
+
+  const bySubject = {};
+  subjects.forEach(sub => {
+    const key = sub.name.trim().toLowerCase();
+    bySubject[key] = {
+      name:  sub.name,
+      today: (logs[today]||{})[sub.id] || 0,
+      week:  wKeys.reduce((s,k) => s + ((logs[k]||{})[sub.id]||0), 0),
+      total: Object.values(logs).reduce((s,d) => s + (d[sub.id]||0), 0)
+    };
+  });
+
   return {
-    today: sum(logs[today]),
-    week:  wKeys.reduce((s,k) => s + sum(logs[k]), 0),
-    total: Object.values(logs).reduce((s,d) => s + sum(d), 0)
+    today:     sum(logs[today]),
+    week:      wKeys.reduce((s,k) => s + sum(logs[k]), 0),
+    total:     Object.values(logs).reduce((s,d) => s + sum(d), 0),
+    bySubject
   };
 }
 function generateCode() {
@@ -174,7 +188,7 @@ app.get('/api/groups/:id/leaderboard', auth, (req, res) => {
   const group = db.prepare('SELECT name,code FROM groups WHERE id=?').get(req.params.id);
   if (!group) return res.status(404).json({ error: 'Grupo no encontrado' });
   const members = db.prepare(`
-    SELECT u.id, u.username, COALESCE(ud.logs,'{}') as logs
+    SELECT u.id, u.username, COALESCE(ud.logs,'{}') as logs, COALESCE(ud.subjects,'[]') as subjects
     FROM users u
     JOIN group_members gm ON u.id=gm.user_id AND gm.group_id=?
     LEFT JOIN user_data ud ON u.id=ud.user_id
@@ -182,7 +196,7 @@ app.get('/api/groups/:id/leaderboard', auth, (req, res) => {
   const board = members.map(m => ({
     username: m.username,
     isMe: m.id === req.user.id,
-    ...computeStats(m.logs)
+    ...computeStats(m.logs, m.subjects)
   }));
   res.json({ group, board });
 });

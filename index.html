@@ -352,40 +352,50 @@
     .auth-btn:active  { transform: scale(.98); }
     .auth-btn:disabled { opacity: .5; cursor: default; transform: none; }
 
-    /* ─── Groups list ─── */
-    .add-btn.ghost {
+    /* ─── Groups ─── */
+    .groups-wrap { padding-bottom: 48px; }
+    .grp-action-btn {
+      padding: 7px 13px; border-radius: 10px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: inherit; border: 1px solid var(--border);
       background: var(--s2); color: var(--t2);
-      border: 1px solid var(--border);
+      transition: background .15s, color .15s;
     }
-    .group-card {
-      background: var(--s1); border: 1px solid var(--border);
-      border-radius: 16px; padding: 14px 16px;
+    .grp-action-btn:hover { background: var(--s3); color: var(--text); }
+    .grp-action-btn.primary { background: var(--text); color: var(--bg); border-color: transparent; }
+    .grp-action-btn.primary:hover { opacity: .85; }
+
+    .group-row {
       display: flex; align-items: center; gap: 10px;
-      margin-bottom: 8px; animation: si .35s cubic-bezier(.34,1.4,.64,1) both;
+      padding: 13px 4px; border-bottom: 1px solid var(--border);
+      animation: si .3s cubic-bezier(.34,1.4,.64,1) both;
     }
-    .group-info { flex: 1; min-width: 0; }
-    .group-name { font-size: 15px; font-weight: 600; letter-spacing: -.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .group-meta { font-size: 11px; color: var(--t3); margin-top: 2px; }
-    .group-code {
-      font-size: 11px; font-family: monospace; letter-spacing: 1.5px;
+    .group-row:last-child { border-bottom: none; }
+    .group-row-info { flex: 1; min-width: 0; }
+    .group-row-name {
+      font-size: 14px; font-weight: 600; letter-spacing: -.3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .group-row-meta { font-size: 11px; color: var(--t3); margin-top: 2px; }
+    .group-row-code {
+      font-size: 10px; font-family: monospace; letter-spacing: 1.5px;
       color: var(--t3); background: var(--s2); border: 1px solid var(--border);
-      border-radius: 8px; padding: 4px 10px; cursor: pointer;
-      transition: color .15s; white-space: nowrap; flex-shrink: 0;
+      border-radius: 6px; padding: 3px 8px; cursor: pointer; flex-shrink: 0;
+      transition: color .15s; white-space: nowrap;
     }
-    .group-code:hover { color: var(--t2); }
-    .group-btn {
-      background: var(--s2); border: 1px solid var(--border);
-      border-radius: 10px; color: var(--t2); font-size: 12px; font-weight: 600;
-      padding: 7px 12px; cursor: pointer; font-family: inherit;
-      transition: background .15s, color .15s; white-space: nowrap; flex-shrink: 0;
+    .group-row-code:hover { color: var(--t2); }
+    .group-row-ranking {
+      font-size: 12px; font-weight: 600; color: var(--t2); flex-shrink: 0;
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      padding: 4px 2px; transition: color .15s;
     }
-    .group-btn:hover { background: var(--s3); color: var(--text); }
-    .group-leave {
-      background: none; border: none; color: var(--t3); font-size: 20px;
-      cursor: pointer; padding: 2px 4px; border-radius: 8px;
-      transition: color .15s; line-height: 1; flex-shrink: 0;
+    .group-row-ranking:hover { color: var(--text); }
+    .group-row-leave {
+      background: none; border: none; color: var(--t3); font-size: 16px;
+      cursor: pointer; padding: 2px; border-radius: 6px; line-height: 1;
+      flex-shrink: 0; transition: color .15s; font-family: inherit;
     }
-    .group-leave:hover { color: var(--red); }
+    .group-row-leave:hover { color: var(--red); }
+    .groups-empty { font-size: 13px; color: var(--t3); padding: 16px 4px; line-height: 1.6; }
 
     /* ─── Leaderboard overlay ─── */
     .lb-overlay {
@@ -451,6 +461,27 @@
     .lb-diff.leader { color: var(--green); }
     .lb-diff.behind { color: var(--red); }
     .lb-empty { text-align: center; padding: 32px 16px; font-size: 13px; color: var(--t3); }
+
+    /* ─── Per-subject leaderboard ─── */
+    .lb-subj-section { margin-bottom: 14px; }
+    .lb-subj-title {
+      font-size: 10px; font-weight: 600; color: var(--t3);
+      text-transform: uppercase; letter-spacing: 1px;
+      padding: 0 10px 6px; border-bottom: 1px solid var(--border); margin-bottom: 4px;
+    }
+    .lb-subj-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 10px;
+    }
+    .lb-subj-row.me { background: var(--s2); }
+    .lb-subj-rank { font-size: 15px; min-width: 26px; text-align: center; }
+    .lb-subj-rank.num { font-size: 12px; font-weight: 700; color: var(--t3); }
+    .lb-subj-user {
+      flex: 1; font-size: 13px; font-weight: 500; color: var(--t2);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .lb-subj-user.me { color: var(--text); font-weight: 600; }
+    .lb-subj-hrs { font-size: 14px; font-weight: 700; letter-spacing: -.5px; flex-shrink: 0; }
 
     /* ─── Responsive ─── */
     @media (max-width: 380px) {
@@ -557,26 +588,25 @@
   <div class="subjects" id="J_subjects"></div>
 
   <!-- Total -->
-  <div class="total-card" style="margin-bottom:20px;">
+  <div class="total-card">
     <div class="total-info">
       <div class="lbl">Total acumulado</div>
       <div class="sub">todas las asignaturas · siempre</div>
     </div>
     <div class="total-val" id="J_total">0h</div>
-    <!-- Groups -->
-  <div class="sec-head">
-    <span class="card-title">Grupos</span>
-    <div style="display:flex;gap:6px;">
-      <button class="add-btn ghost" onclick="openJoinGroup()">Unirse</button>
-      <button class="add-btn" onclick="openCreateGroup()">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-          <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        Crear
-      </button>
-    </div>
   </div>
-  <div id="J_groups" style="margin-bottom:40px;"></div>
+
+  <!-- Groups -->
+  <div class="groups-wrap">
+    <div class="sec-head" style="margin-top:24px;">
+      <span class="card-title">Grupos</span>
+      <div style="display:flex;gap:6px;">
+        <button class="grp-action-btn" onclick="openJoinGroup()">Unirse</button>
+        <button class="grp-action-btn primary" onclick="openCreateGroup()">+ Crear</button>
+      </div>
+    </div>
+    <div id="J_groups"></div>
+  </div>
 
 </div>
 
@@ -591,9 +621,10 @@
       <button class="lb-close" onclick="closeLb()">×</button>
     </div>
     <div class="lb-tabs">
-      <button class="lb-tab active" data-metric="week"  onclick="setLbMetric('week')">Esta semana</button>
-      <button class="lb-tab"        data-metric="today" onclick="setLbMetric('today')">Hoy</button>
-      <button class="lb-tab"        data-metric="total" onclick="setLbMetric('total')">Total</button>
+      <button class="lb-tab active" data-metric="week"     onclick="setLbMetric('week')">Esta semana</button>
+      <button class="lb-tab"        data-metric="today"    onclick="setLbMetric('today')">Hoy</button>
+      <button class="lb-tab"        data-metric="total"    onclick="setLbMetric('total')">Total</button>
+      <button class="lb-tab"        data-metric="subjects" onclick="setLbMetric('subjects')">Por asignatura</button>
     </div>
     <div class="lb-board" id="J_lbBoard"></div>
   </div>
@@ -1101,6 +1132,7 @@ function buildColorPicker(current = COLORS[0]) {
    Sheet
 ═══════════════════════════════════ */
 function openAdd() {
+  sheetMode = 'subject';
   editId = null;
   document.getElementById('J_sheetTitle').textContent = 'Nueva asignatura';
   document.getElementById('J_input').placeholder = 'Nombre de la asignatura';
@@ -1108,13 +1140,13 @@ function openAdd() {
   document.getElementById('J_colorRow').style.display = 'flex';
   buildColorPicker(COLORS[0]);
   document.getElementById('J_sheetActs').innerHTML = `
-    <button class="sbtn secondary" id="J_cancel">Cancelar</button>
-    <button class="sbtn primary"   id="J_save">Guardar</button>`;
-  bindSheet();
+    <button class="sbtn secondary" onclick="hideSheet()">Cancelar</button>
+    <button class="sbtn primary"   onclick="doSave()">Guardar</button>`;
   showSheet();
 }
 
 function openEdit(id, name, color) {
+  sheetMode = 'subject';
   editId = id;
   document.getElementById('J_sheetTitle').textContent = 'Editar asignatura';
   document.getElementById('J_input').placeholder = 'Nombre de la asignatura';
@@ -1122,19 +1154,9 @@ function openEdit(id, name, color) {
   document.getElementById('J_colorRow').style.display = 'flex';
   buildColorPicker(color);
   document.getElementById('J_sheetActs').innerHTML = `
-    <button class="sbtn danger"  id="J_del">Eliminar</button>
-    <button class="sbtn primary" id="J_save">Guardar</button>`;
-  bindSheet();
+    <button class="sbtn danger"  onclick="doDelete()">Eliminar</button>
+    <button class="sbtn primary" onclick="doSave()">Guardar</button>`;
   showSheet();
-}
-
-function bindSheet() {
-  const save   = document.getElementById('J_save');
-  const cancel = document.getElementById('J_cancel');
-  const del    = document.getElementById('J_del');
-  if (save)   save.addEventListener('click', doSave);
-  if (cancel) cancel.addEventListener('click', hideSheet);
-  if (del)    del.addEventListener('click', doDelete);
 }
 
 function doSave() {
@@ -1181,7 +1203,11 @@ document.getElementById('J_overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('J_overlay')) hideSheet();
 });
 document.getElementById('J_input').addEventListener('keydown', e => {
-  if (e.key === 'Enter')  doSave();
+  if (e.key === 'Enter') {
+    if      (sheetMode === 'createGroup') doCreateGroup();
+    else if (sheetMode === 'joinGroup')   doJoinGroup();
+    else                                  doSave();
+  }
   if (e.key === 'Escape') hideSheet();
 });
 
@@ -1192,6 +1218,7 @@ let groups    = [];
 let lbData    = null;
 let lbMetric  = 'week';
 let lbGroupId = null;
+let sheetMode = 'subject'; // 'subject' | 'createGroup' | 'joinGroup'
 
 async function loadGroups() {
   try {
@@ -1203,52 +1230,48 @@ async function loadGroups() {
 function renderGroups() {
   const el = document.getElementById('J_groups');
   if (!groups.length) {
-    el.innerHTML = `<div class="empty" style="padding:20px 16px 0;">
-      <div class="empty-txt">Sin grupos todavía.<br>Crea uno o únete con un código.</div>
-    </div>`;
+    el.innerHTML = `<div class="groups-empty">Sin grupos todavía.<br>Crea uno o únete con un código de invitación.</div>`;
     return;
   }
   el.innerHTML = '';
   groups.forEach(g => {
-    const card = document.createElement('div');
-    card.className = 'group-card';
-    card.innerHTML = `
-      <div class="group-info">
-        <div class="group-name">${esc(g.name)}</div>
-        <div class="group-meta">${g.members} ${g.members === 1 ? 'miembro' : 'miembros'}</div>
+    const row = document.createElement('div');
+    row.className = 'group-row';
+    row.innerHTML = `
+      <div class="group-row-info">
+        <div class="group-row-name">${esc(g.name)}</div>
+        <div class="group-row-meta">${g.members} ${g.members === 1 ? 'miembro' : 'miembros'}</div>
       </div>
-      <button class="group-code" onclick="copyGroupCode('${g.code}')" title="Copiar código de invitación">${g.code}</button>
-      <button class="group-btn"  onclick="openLeaderboard('${g.id}')">Ranking</button>
-      <button class="group-leave" onclick="leaveGroup('${g.id}','${esc(g.name)}')" title="Salir del grupo">×</button>`;
-    el.appendChild(card);
+      <button class="group-row-code" onclick="copyGroupCode('${g.code}')" title="Copiar código">${g.code}</button>
+      <button class="group-row-ranking" onclick="openLeaderboard('${g.id}')">Ver ranking</button>
+      <button class="group-row-leave" onclick="leaveGroup('${g.id}','${esc(g.name)}')" title="Salir">×</button>`;
+    el.appendChild(row);
   });
 }
 
 function openCreateGroup() {
+  sheetMode = 'createGroup';
   editId = null;
   document.getElementById('J_sheetTitle').textContent = 'Nuevo grupo';
   document.getElementById('J_input').placeholder = 'Nombre del grupo';
   document.getElementById('J_input').value = '';
   document.getElementById('J_colorRow').style.display = 'none';
   document.getElementById('J_sheetActs').innerHTML = `
-    <button class="sbtn secondary" id="J_cancel">Cancelar</button>
-    <button class="sbtn primary"   id="J_save">Crear</button>`;
-  document.getElementById('J_save').addEventListener('click', doCreateGroup);
-  document.getElementById('J_cancel').addEventListener('click', hideSheet);
+    <button class="sbtn secondary" onclick="hideSheet()">Cancelar</button>
+    <button class="sbtn primary"   onclick="doCreateGroup()">Crear</button>`;
   showSheet();
 }
 
 function openJoinGroup() {
+  sheetMode = 'joinGroup';
   editId = null;
   document.getElementById('J_sheetTitle').textContent = 'Unirse a un grupo';
   document.getElementById('J_input').placeholder = 'Código de invitación (ej: XK7P2M)';
   document.getElementById('J_input').value = '';
   document.getElementById('J_colorRow').style.display = 'none';
   document.getElementById('J_sheetActs').innerHTML = `
-    <button class="sbtn secondary" id="J_cancel">Cancelar</button>
-    <button class="sbtn primary"   id="J_save">Unirse</button>`;
-  document.getElementById('J_save').addEventListener('click', doJoinGroup);
-  document.getElementById('J_cancel').addEventListener('click', hideSheet);
+    <button class="sbtn secondary" onclick="hideSheet()">Cancelar</button>
+    <button class="sbtn primary"   onclick="doJoinGroup()">Unirse</button>`;
   showSheet();
 }
 
@@ -1308,7 +1331,7 @@ async function openLeaderboard(groupId) {
       t.classList.toggle('active', t.dataset.metric === 'week'));
     renderLeaderboard();
     document.getElementById('J_lbOverlay').classList.add('open');
-  } catch {}
+  } catch (e) { console.error(e); }
 }
 
 function closeLb() {
@@ -1319,7 +1342,8 @@ function setLbMetric(metric) {
   lbMetric = metric;
   document.querySelectorAll('.lb-tab').forEach(t =>
     t.classList.toggle('active', t.dataset.metric === metric));
-  renderLeaderboard();
+  if (metric === 'subjects') renderSubjectBoard();
+  else renderLeaderboard();
 }
 
 function copyLbCode() {
@@ -1379,6 +1403,56 @@ function renderLeaderboard() {
         ${diffHtml}
       </div>`;
     el.appendChild(row);
+  });
+}
+
+function renderSubjectBoard() {
+  if (!lbData) return;
+  const { board } = lbData;
+  const el = document.getElementById('J_lbBoard');
+
+  // Collect all unique subjects across members
+  const allSubjects = new Map(); // lowerKey -> displayName
+  board.forEach(m => {
+    if (!m.bySubject) return;
+    Object.entries(m.bySubject).forEach(([key, sub]) => {
+      if (!allSubjects.has(key)) allSubjects.set(key, sub.name);
+    });
+  });
+
+  if (allSubjects.size === 0) {
+    el.innerHTML = '<div class="lb-empty">Ningún miembro tiene asignaturas todavía</div>';
+    return;
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+  el.innerHTML = '';
+
+  allSubjects.forEach((name, key) => {
+    const members = board
+      .map(m => ({ username: m.username, isMe: m.isMe, h: m.bySubject?.[key]?.week || 0 }))
+      .filter(m => m.h > 0)
+      .sort((a, b) => b.h - a.h);
+
+    if (!members.length) return;
+
+    const section = document.createElement('div');
+    section.className = 'lb-subj-section';
+
+    const rows = members.map((m, i) => {
+      const rankHtml = i < 3
+        ? `<span class="lb-subj-rank">${medals[i]}</span>`
+        : `<span class="lb-subj-rank num">${i+1}</span>`;
+      return `
+        <div class="lb-subj-row${m.isMe ? ' me' : ''}">
+          ${rankHtml}
+          <span class="lb-subj-user${m.isMe ? ' me' : ''}">${esc(m.username)}${m.isMe ? ' · tú' : ''}</span>
+          <span class="lb-subj-hrs">${fmt(m.h)}</span>
+        </div>`;
+    }).join('');
+
+    section.innerHTML = `<div class="lb-subj-title">${esc(name)}</div>${rows}`;
+    el.appendChild(section);
   });
 }
 
