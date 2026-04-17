@@ -1449,9 +1449,10 @@ async function togglePush() {
    Groups
 ═══════════════════════════════════ */
 let groups    = [];
-let lbData    = null;
-let lbMetric  = 'week';
-let lbGroupId = null;
+let lbData       = null;
+let lbMetric     = 'week';
+let lbGroupId    = null;
+let lbPollTimer  = null;
 let sheetMode = 'subject'; // 'subject' | 'createGroup' | 'joinGroup'
 
 async function loadGroups() {
@@ -1565,11 +1566,27 @@ async function openLeaderboard(groupId) {
       t.classList.toggle('active', t.dataset.metric === 'week'));
     renderLeaderboard();
     document.getElementById('J_lbOverlay').classList.add('open');
+    // Polling cada 10s mientras el leaderboard está abierto
+    clearInterval(lbPollTimer);
+    lbPollTimer = setInterval(pollLeaderboard, 10000);
   } catch (e) { console.error(e); }
+}
+
+async function pollLeaderboard() {
+  if (!lbGroupId) return;
+  try {
+    const res = await apiFetch(`/api/groups/${lbGroupId}/leaderboard`);
+    if (!res.ok) return;
+    lbData = await res.json();
+    if (lbMetric === 'subjects') renderSubjectBoard();
+    else renderLeaderboard();
+  } catch {}
 }
 
 function closeLb() {
   document.getElementById('J_lbOverlay').classList.remove('open');
+  clearInterval(lbPollTimer);
+  lbPollTimer = null;
 }
 
 function setLbMetric(metric) {
@@ -1745,6 +1762,7 @@ async function boot() {
     hideAuth();
     render();
     loadGroups();
+    setInterval(loadGroups, 30000);
   } catch {
     clearToken();
     showAuth();
