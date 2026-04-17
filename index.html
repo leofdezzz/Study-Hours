@@ -556,7 +556,8 @@
 </head>
 <body>
 
-<!-- Auth Screen -->
+<!-- Auth Screen: oculta inmediatamente si hay sesión activa -->
+<script>if(localStorage.getItem('sh_token'))document.write('<style>#J_auth{display:none}</style>');</script>
 <div class="auth-screen" id="J_auth">
   <div class="auth-card">
     <div class="auth-logo">Study Hours</div>
@@ -673,6 +674,7 @@
         <div class="lb-group-name" id="J_lbName"></div>
         <button class="lb-code-btn" id="J_lbCodeBtn" onclick="copyLbCode()"></button>
       </div>
+      <button class="lb-close" id="J_lbRefresh" onclick="manualRefreshLb()" title="Actualizar">↻</button>
       <button class="lb-close" onclick="closeLb()">×</button>
     </div>
     <div class="lb-tabs">
@@ -722,7 +724,11 @@ function getToken()  { return localStorage.getItem('sh_token'); }
 function setToken(t) { localStorage.setItem('sh_token', t); }
 function clearToken(){ localStorage.removeItem('sh_token'); }
 
-function showAuth() { document.getElementById('J_auth').classList.remove('hidden'); }
+function showAuth() {
+  const el = document.getElementById('J_auth');
+  el.style.display = '';
+  el.classList.remove('hidden');
+}
 function hideAuth() { document.getElementById('J_auth').classList.add('hidden'); }
 
 function switchAuthTab(mode) {
@@ -1581,6 +1587,15 @@ async function pollLeaderboard() {
     if (lbMetric === 'subjects') renderSubjectBoard();
     else renderLeaderboard();
   } catch {}
+}
+
+async function manualRefreshLb() {
+  const btn = document.getElementById('J_lbRefresh');
+  if (btn) { btn.style.opacity = '.4'; btn.style.transform = 'rotate(360deg)'; btn.style.transition = 'transform .4s'; }
+  await pollLeaderboard();
+  setTimeout(() => {
+    if (btn) { btn.style.opacity = ''; btn.style.transform = ''; btn.style.transition = ''; }
+  }, 400);
 }
 
 function closeLb() {
