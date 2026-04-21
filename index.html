@@ -407,6 +407,108 @@
     font-size: 18px; line-height: 1;
   }
 
+  /* ─── Daily goal card ─── */
+  .goal-card {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px 16px;
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s;
+  }
+  .goal-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(120% 80% at 0% 0%, var(--accent-dim), transparent 50%);
+    pointer-events: none;
+  }
+  .goal-card:hover { border-color: var(--line2); }
+  .goal-card:active { transform: scale(0.997); }
+  .goal-card.empty {
+    border-style: dashed;
+    padding: 18px;
+    text-align: center;
+  }
+  .goal-card.empty .gl-prompt {
+    font-size: 14px; color: var(--t2);
+    margin-top: 6px;
+    letter-spacing: -0.01em;
+  }
+  .goal-card.empty .gl-lbl {
+    font-size: 10px; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.2em; font-weight: 600;
+  }
+  .goal-card .gl-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 10px;
+  }
+  .goal-card .gl-lbl {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+    color: var(--t3); font-weight: 600;
+  }
+  .goal-card .gl-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .goal-card .gl-nums {
+    display: flex; align-items: baseline; gap: 6px;
+    line-height: 0.95;
+    margin-bottom: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .goal-card .gl-cur {
+    font-family: 'Instrument Serif', serif;
+    font-size: 40px; letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .goal-card .gl-cur .u { font-size: 16px; color: var(--t3); margin-left: 1px; }
+  .goal-card .gl-sep { color: var(--t4); font-size: 18px; margin: 0 2px; }
+  .goal-card .gl-goal {
+    font-size: 14px; color: var(--t3); font-weight: 500;
+  }
+  .goal-card .gl-bar {
+    height: 6px; border-radius: 99px;
+    background: oklch(0.22 0.009 80);
+    overflow: hidden;
+    position: relative;
+  }
+  .goal-card .gl-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent) 0%, oklch(from var(--accent) calc(l + 0.08) c h) 100%);
+    border-radius: 99px;
+    transition: width 0.9s cubic-bezier(.34,1.2,.64,1);
+    position: relative;
+  }
+  .goal-card .gl-fill::after {
+    content: '';
+    position: absolute; top: 0; right: 0; bottom: 0;
+    width: 6px;
+    background: oklch(from var(--accent) calc(l + 0.15) c h);
+    box-shadow: 0 0 10px var(--accent);
+    border-radius: 99px;
+  }
+  .goal-card .gl-foot {
+    margin-top: 10px;
+    font-size: 11px; color: var(--t3);
+    letter-spacing: 0.04em;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .goal-card.done {
+    border-color: oklch(from var(--accent) l c h / 0.5);
+    background: linear-gradient(180deg, oklch(from var(--accent) l c h / 0.07), var(--bg2));
+  }
+  .goal-card.done .gl-foot {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .goal-card.done .gl-cur { color: var(--accent); }
+
   /* ─── Week chart ─── */
   .week-card {
     background: var(--bg2);
@@ -801,6 +903,7 @@
     transition: transform .2s;
   }
   .pod:hover { transform: translateY(-2px); }
+  .pod[onclick] { cursor: pointer; }
   .pod.me { box-shadow: inset 0 0 0 1px var(--accent); }
   .pod .crown {
     position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
@@ -848,6 +951,92 @@
   .pod.p2 { padding-top: 16px; }
   .pod.p3 { padding-top: 12px; opacity: 0.95; }
 
+  /* Studying state on podium */
+  .pod.studying {
+    border-color: oklch(from var(--accent) l c h / 0.55);
+    box-shadow: 0 0 0 1px oklch(from var(--accent) l c h / 0.4),
+                0 14px 30px -18px oklch(from var(--accent) l c h / 0.6);
+  }
+  .pod.studying .avatar {
+    animation: podPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes podPulse {
+    0%, 100% { box-shadow: 0 0 0 3px var(--bg2), 0 0 0 4px var(--_c, var(--accent)); }
+    50%      { box-shadow: 0 0 0 3px var(--bg2), 0 0 0 5px var(--_c, var(--accent)), 0 0 18px oklch(from var(--_c, var(--accent)) l c h / 0.7); }
+  }
+  .pod .live-badge {
+    position: absolute; top: 8px; left: 8px;
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 8.5px; font-weight: 700;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--accent);
+    padding: 3px 6px 3px 5px;
+    border-radius: 99px;
+    background: oklch(from var(--accent) l c h / 0.14);
+    border: 1px solid oklch(from var(--accent) l c h / 0.35);
+  }
+  .pod .live-badge::before {
+    content: '';
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent);
+    animation: blink 1.2s infinite;
+  }
+
+  /* Received reactions summary (under pod avatar) */
+  .pod .pod-rx {
+    display: flex; gap: 3px;
+    justify-content: center;
+    margin-top: 6px;
+    min-height: 16px;
+  }
+  .pod .pod-rx .rx-chip {
+    display: inline-flex; align-items: center; gap: 2px;
+    font-size: 11px; line-height: 1;
+    padding: 2px 5px;
+    border-radius: 99px;
+    background: oklch(0.22 0.009 80);
+    color: var(--t2);
+  }
+  .pod .pod-rx .rx-chip .cnt {
+    font-size: 9.5px; font-variant-numeric: tabular-nums;
+    color: var(--t3); font-weight: 600;
+  }
+  .pod .pod-rx .rx-chip.mine {
+    background: oklch(from var(--accent) l c h / 0.16);
+    color: var(--text);
+  }
+
+  /* React sheet — large emoji picker modal */
+  .react-sheet-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 4px 0 8px;
+  }
+  .react-sheet-row .react-big {
+    aspect-ratio: 1 / 1;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: var(--bg2);
+    font-size: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+    transition: transform .15s, border-color .15s, background .15s;
+  }
+  .react-sheet-row .react-big:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .react-sheet-row .react-big:active { transform: scale(0.94); }
+  .react-sheet-row .react-big.mine {
+    border-color: var(--accent);
+    background: oklch(from var(--accent) l c h / 0.14);
+  }
+  .react-sheet-row .react-big .cnt {
+    font-size: 10px; color: var(--t3);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+  .react-sheet-row .react-big.mine .cnt { color: var(--accent); }
+
   /* Ranking list (4+) */
   .rank-list {
     display: flex; flex-direction: column;
@@ -867,6 +1056,17 @@
   .rank-row.me {
     border-color: var(--accent);
     background: oklch(from var(--accent) l c h / 0.06);
+  }
+  .rank-row.studying {
+    border-color: oklch(from var(--accent) l c h / 0.4);
+    background: oklch(from var(--accent) l c h / 0.05);
+  }
+  .rank-row.studying .av {
+    animation: rankPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes rankPulse {
+    0%, 100% { box-shadow: 0 0 0 0 oklch(from var(--_c, var(--accent)) l c h / 0.55); }
+    50%      { box-shadow: 0 0 0 4px oklch(from var(--_c, var(--accent)) l c h / 0.0); }
   }
   .rank-row .rk {
     font-family: 'JetBrains Mono', monospace;
@@ -946,32 +1146,59 @@
     transition: width 0.8s cubic-bezier(.34,1.2,.64,1);
   }
 
-  /* Reactions row */
-  .reactions {
-    display: flex; gap: 4px;
-    flex-wrap: wrap;
-    margin-top: 8px;
+  /* Inline react strip on rank-rows */
+  .rx-inline {
+    display: flex; align-items: center; gap: 3px;
+    margin-top: 4px;
   }
-  .react-btn {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 4px 8px;
-    border-radius: 10px;
-    border: 1px solid var(--line);
-    background: oklch(0.20 0.009 80);
-    font-size: 12px;
-    color: var(--t2);
-    font-weight: 600;
+  .rx-inline .rx-btn {
+    display: inline-flex; align-items: center; gap: 2px;
+    padding: 2px 5px 2px 4px;
+    border-radius: 99px;
+    border: 1px solid transparent;
+    background: transparent;
+    font-size: 11px;
+    color: var(--t3);
     transition: border-color .15s, background .15s, transform .1s;
+    line-height: 1;
   }
-  .react-btn:hover { border-color: var(--line2); color: var(--text); }
-  .react-btn:active { transform: scale(0.92); }
-  .react-btn.mine {
-    border-color: var(--accent);
-    background: oklch(from var(--accent) l c h / 0.12);
+  .rx-inline .rx-btn:hover {
+    background: oklch(0.22 0.009 80);
+    border-color: var(--line);
+  }
+  .rx-inline .rx-btn:active { transform: scale(0.9); }
+  .rx-inline .rx-btn.mine {
+    background: oklch(from var(--accent) l c h / 0.16);
+    border-color: oklch(from var(--accent) l c h / 0.4);
     color: var(--text);
+    animation: np 0.4s ease;
   }
-  .react-btn .cnt { font-size: 11px; font-variant-numeric: tabular-nums; }
-  .react-btn .emoji { font-size: 13px; line-height: 1; }
+  .rx-inline .rx-btn .emoji { font-size: 12px; line-height: 1; }
+  .rx-inline .rx-btn .cnt { font-size: 10px; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .rx-inline .rx-btn.empty { opacity: 0.55; }
+  .rx-inline .rx-btn.empty:hover { opacity: 1; }
+
+  /* Live users strip in gc-meta */
+  .gc-meta .live-names {
+    display: inline-flex; align-items: center; gap: 4px;
+    flex-wrap: wrap;
+  }
+  .gc-meta .live-names .dot-av {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--_c, var(--accent));
+    color: var(--bg);
+    font-size: 8px; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    border: 1.5px solid var(--bg2);
+    margin-left: -5px;
+  }
+  .gc-meta .live-names .dot-av:first-child { margin-left: 0; }
+  .gc-meta .live-names .plus {
+    font-size: 9px; color: var(--t3);
+    margin-left: 2px;
+  }
 
   /* Group tabs (period selector) */
   .period-tabs {
@@ -1496,6 +1723,7 @@ function buildApp() {
       ${buildStage()}
       ${buildChips()}
       ${buildStats()}
+      ${buildGoal()}
       ${buildWeek()}
       ${buildSubjects()}
       ${buildGroups()}
@@ -1598,12 +1826,14 @@ function buildGroups() {
   const podiumHtml = podiumOrder.length >= 2 ? `
     <div class="podium">
       ${podiumOrder.map((m, i) => m ? `
-        <div class="pod ${podiumClasses[i]}${m.isMe ? ' me' : ''}" style="--_c:${m.color}">
+        <div class="pod ${podiumClasses[i]}${m.isMe ? ' me' : ''}${m.studying ? ' studying' : ''}" style="--_c:${m.color}" ${!m.isMe ? `onclick="openReactSheet('${g.id}','${m.id}')"` : ''}>
+          ${m.studying ? '<span class="live-badge">EN VIVO</span>' : ''}
           ${crowns[i] ? `<div class="crown">${crowns[i]}</div>` : ''}
           <div class="pod-rank">#${ranks[i]}</div>
           <div class="avatar">${esc(m.name.charAt(0).toUpperCase())}</div>
           <div class="pod-name">${esc(m.name)}</div>
           <div class="pod-hrs">${fmt(m[key] || 0).n}<span class="u">${fmt(m[key] || 0).unit}</span></div>
+          ${buildPodRx(m)}
         </div>` : ''
       ).join('')}
     </div>
@@ -1623,13 +1853,14 @@ function buildGroups() {
           ? '<span class="studying-pip">estudiando ahora</span>'
           : (m.streak > 0 ? `<span class="streak-pip">✦ ${m.streak} ${m.streak === 1 ? 'día' : 'días'}</span>` : 'sin actividad');
         return `
-          <div class="rank-row${m.isMe ? ' me' : ''}" style="--_c:${m.color}" onclick="${!m.isMe ? `quickReact('${g.id}','${m.id}')` : ''}">
+          <div class="rank-row${m.isMe ? ' me' : ''}${m.studying ? ' studying' : ''}" style="--_c:${m.color}">
             <div class="progress-bar" style="width:${pct}%"></div>
             <div class="rk">${rank}</div>
             <div class="av">${esc(m.name.charAt(0).toUpperCase())}</div>
             <div class="name-col">
               <div class="nm">${esc(m.name)}${m.isMe ? '<span class="you">TÚ</span>' : ''}</div>
               <div class="status">${status}</div>
+              ${!m.isMe ? buildRxInline(g.id, m) : ''}
             </div>
             <div class="hrs-col">
               <div class="hrs">${fmt(val).n}<span class="u">${fmt(val).unit}</span></div>
@@ -1641,8 +1872,16 @@ function buildGroups() {
     </div>
   ` : '';
 
-  // Podium reactions — for top 3 members other than me
-  const podiumReactions = podium.filter(m => !m.isMe).map(m => buildReactionsFor(g.id, m)).join('');
+  // Live users preview — avatars of the people studying right now
+  const liveUsers = members.filter(m => m.studying);
+  const liveNamesHtml = liveUsers.length > 0 ? `
+    <span class="dot"></span>
+    <span class="live-names">
+      ${liveUsers.slice(0, 3).map(u => `<span class="dot-av" style="--_c:${u.color}" title="${esc(u.name)}">${esc(u.name.charAt(0).toUpperCase())}</span>`).join('')}
+      ${liveUsers.length > 3 ? `<span class="plus">+${liveUsers.length - 3}</span>` : ''}
+      <span class="live-pill">${liveCount} en vivo</span>
+    </span>
+  ` : '';
 
   return `
     <section class="groups-wrap">
@@ -1660,7 +1899,7 @@ function buildGroups() {
             <div class="gc-name">${esc(g.name)}</div>
             <div class="gc-meta">
               <span>${members.length} ${members.length === 1 ? 'miembro' : 'miembros'}</span>
-              ${liveCount > 0 ? `<span class="dot"></span><span class="live-pill">${liveCount} en vivo</span>` : ''}
+              ${liveNamesHtml}
             </div>
           </div>
           <button class="gc-code" onclick="copyCode('${g.code}')" title="Copiar código">
@@ -1679,10 +1918,6 @@ function buildGroups() {
         ${podiumHtml}
         ${restHtml}
 
-        <div style="margin-top:10px;">
-          ${podiumReactions}
-        </div>
-
         <div style="margin-top:14px; display:flex; justify-content:flex-end;">
           <button class="g-tab-btn" style="color:var(--t3);" onclick="leaveGroup('${g.id}','${esc(g.name).replace(/'/g,"\\'")}')">Salir del grupo</button>
         </div>
@@ -1694,19 +1929,33 @@ function buildGroups() {
 // VALID_EMOJIS in server.js: ['🔥','💀','😤','👑']
 const REACTIONS = ['🔥','😤','👑','💀'];
 
-function buildReactionsFor(gid, m) {
+// Received-reactions summary chips (podium pods) — shows only emojis with count > 0
+function buildPodRx(m) {
+  const rx = m.reactions || {};
+  const active = REACTIONS.filter(e => (rx[e]?.count || 0) > 0);
+  if (active.length === 0) return '<div class="pod-rx"></div>';
+  return `
+    <div class="pod-rx">
+      ${active.map(e => {
+        const r = rx[e];
+        return `<span class="rx-chip${r.iMine ? ' mine' : ''}">${e}<span class="cnt">${r.count}</span></span>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+// Inline reaction strip on rank-row
+function buildRxInline(gid, m) {
   const rx = m.reactions || {};
   return `
-    <div style="display:flex; align-items:center; gap:8px; padding:6px 2px; font-size:11px; color:var(--t3);">
-      <span style="min-width:54px; text-transform:uppercase; letter-spacing:0.12em; font-weight:600;">Reaccionar a <b style="color:var(--text); font-weight:600;">${esc(m.name)}</b></span>
-      <div class="reactions">
-        ${REACTIONS.map(e => {
-          const r = rx[e] || { count: 0, iMine: false };
-          return `<button class="react-btn${r.iMine?' mine':''}" onclick="event.stopPropagation();sendReaction('${gid}','${m.id}','${e}')">
-            <span class="emoji">${e}</span>${r.count>0?`<span class="cnt">${r.count}</span>`:''}
-          </button>`;
-        }).join('')}
-      </div>
+    <div class="rx-inline" onclick="event.stopPropagation()">
+      ${REACTIONS.map(e => {
+        const r = rx[e] || { count: 0, iMine: false };
+        const empty = r.count === 0;
+        return `<button class="rx-btn${r.iMine ? ' mine' : ''}${empty ? ' empty' : ''}" onclick="sendReaction('${gid}','${m.id}','${e}')">
+          <span class="emoji">${e}</span>${r.count > 0 ? `<span class="cnt">${r.count}</span>` : ''}
+        </button>`;
+      }).join('')}
     </div>
   `;
 }
@@ -1736,9 +1985,37 @@ async function sendReaction(gid, mid, emoji) {
   } catch {}
 }
 
-function quickReact(gid, mid) {
-  // Row tap → quick 🔥
-  sendReaction(gid, mid, '🔥');
+function openReactSheet(gid, mid) {
+  const lb = boards[gid];
+  const m = lb?.board.find(x => x.id === mid);
+  if (!m) return;
+  const rx = m.reactions || {};
+  const name = m.username || '';
+  showSheet(`
+    <div class="sheet-grip"></div>
+    <h2 class="sheet-title">Reaccionar a <span class="serif">${esc(name)}</span></h2>
+    <div class="react-sheet-row" id="J_reactSheetRow">
+      ${REACTIONS.map(e => {
+        const r = rx[e] || { count: 0, iMine: false };
+        return `<button class="react-big${r.iMine ? ' mine' : ''}" data-emoji="${e}" onclick="sendReactionSheet('${gid}','${mid}','${e}')">
+          <span>${e}</span>
+          ${r.count > 0 ? `<span class="cnt">${r.count}</span>` : '<span class="cnt"> </span>'}
+        </button>`;
+      }).join('')}
+    </div>
+    <div style="font-size:12px;color:var(--t3);margin-bottom:16px;line-height:1.5;">
+      Toca una reacción para darla o quitarla. Se reinicia cada semana.
+    </div>
+    <div class="sheet-acts">
+      <button class="s-btn primary" onclick="hideSheet()">Cerrar</button>
+    </div>
+  `);
+}
+
+async function sendReactionSheet(gid, mid, emoji) {
+  await sendReaction(gid, mid, emoji);
+  // Re-open the sheet with refreshed counts
+  openReactSheet(gid, mid);
 }
 
 function openCreateGroup() {
@@ -2013,6 +2290,44 @@ function buildStats() {
         <div class="val serif">${streak}<span class="unit">${streak === 1 ? 'día' : 'días'}</span></div>
         <div class="meta">${streak > 0 ? '<span class="flame">✦</span> activa' : 'empieza hoy'}</div>
       </div>
+    </section>
+  `;
+}
+
+function buildGoal() {
+  const goal = settings.dailyGoal || 0;
+  if (goal <= 0) {
+    return `
+      <section class="goal-card empty" onclick="openGoal()">
+        <div class="gl-lbl">Meta diaria</div>
+        <div class="gl-prompt">Define tu objetivo y síguelo a diario →</div>
+      </section>
+    `;
+  }
+  const tod = daySum(today());
+  const pct = Math.min(100, Math.round(tod / goal * 100));
+  const achieved = tod >= goal;
+  const remaining = Math.max(0, goal - tod);
+  const fTod = fmt(tod);
+  const fGoal = fmt(goal);
+  const foot = achieved
+    ? '✦ Meta alcanzada · sigue sumando'
+    : tod === 0
+      ? `Faltan ${fmtStr(remaining)} · empieza el cronómetro`
+      : `Faltan ${fmtStr(remaining)} para llegar`;
+  return `
+    <section class="goal-card${achieved ? ' done' : ''}" onclick="openGoal()">
+      <div class="gl-head">
+        <span class="gl-lbl">Meta diaria</span>
+        <span class="gl-pct">${pct}%</span>
+      </div>
+      <div class="gl-nums">
+        <span class="gl-cur serif">${fTod.n}<span class="u">${fTod.unit}</span></span>
+        <span class="gl-sep">/</span>
+        <span class="gl-goal">${fGoal.n}${fGoal.unit}</span>
+      </div>
+      <div class="gl-bar"><div class="gl-fill" style="width:${pct}%"></div></div>
+      <div class="gl-foot">${foot}</div>
     </section>
   `;
 }
