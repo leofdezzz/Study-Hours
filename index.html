@@ -220,11 +220,11 @@
   }
   .stage-controls.paused {
     gap: 10px;
-    padding: 0 16px;
+    padding: 0 20px;
   }
   .stage-controls.paused .big-btn {
     height: 52px;
-    padding: 0 20px;
+    padding: 0 22px;
     font-size: 13px;
     letter-spacing: 0.04em;
     gap: 8px;
@@ -233,7 +233,15 @@
     white-space: nowrap;
     justify-content: center;
   }
-  .stage-controls.paused .big-btn .play-ico { flex: 0 0 auto; }
+  .stage-controls.paused .big-btn svg { flex: 0 0 auto; }
+
+  /* ≤ 430px – Descartar icon-only pill */
+  @media (max-width: 430px) {
+    .stage-controls.paused { gap: 8px; padding: 0 14px; }
+    .stage-controls.paused .big-btn { height: 48px; padding: 0 16px; font-size: 12px; gap: 6px; }
+    .stage-controls.paused .big-btn.ghost .btn-lbl { display: none; }
+    .stage-controls.paused .big-btn.ghost { flex: 0 0 48px; border-radius: 50%; padding: 0; }
+  }
   .big-btn {
     height: 64px;
     padding: 0 36px;
@@ -2179,15 +2187,15 @@ function buildStage() {
     controls = `
       <button class="big-btn ghost" onclick="resetTimer()">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="2" x2="11" y2="11"/><line x1="11" y1="2" x2="2" y2="11"/></svg>
-        Descartar
+        <span class="btn-lbl">Descartar</span>
       </button>
       <button class="big-btn" onclick="resumeTimer()">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor"><path d="M3 2.5l8 4-8 4V2.5z"/></svg>
-        Reanudar
+        <span class="btn-lbl">Reanudar</span>
       </button>
       <button class="big-btn accent" onclick="commitSession()">
         <span style="font-size:16px;line-height:1;font-style:normal;">✓</span>
-        ${saveLabel}
+        <span class="btn-lbl">${saveLabel}</span>
       </button>
     `;
   } else if (running) {
