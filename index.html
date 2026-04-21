@@ -219,21 +219,20 @@
     padding: 0 12px;
   }
   .stage-controls.paused {
-    gap: 8px;
-    padding: 0 10px;
+    gap: 10px;
+    padding: 0 16px;
   }
   .stage-controls.paused .big-btn {
-    height: 54px;
-    padding: 0 10px;
-    font-size: 12.5px;
-    letter-spacing: 0.01em;
-    gap: 6px;
+    height: 52px;
+    padding: 0 20px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    gap: 8px;
     flex: 1 1 0;
     min-width: 0;
     white-space: nowrap;
-    overflow: hidden;
+    justify-content: center;
   }
-  .stage-controls.paused .big-btn span { overflow: hidden; text-overflow: ellipsis; }
   .stage-controls.paused .big-btn .play-ico { flex: 0 0 auto; }
   .big-btn {
     height: 64px;
@@ -2175,20 +2174,26 @@ function buildStage() {
   if (armed) {
     // Session paused — offer Discard / Resume / Save
     const h = ms / 1000 / 3600;
+    const secs = Math.floor(ms / 1000);
+    const saveLabel = secs < 60 ? `Guardar ${secs}s` : `Guardar ${fmtStr(h)}`;
     controls = `
-      <button class="big-btn ghost" onclick="resetTimer()">Descartar</button>
+      <button class="big-btn ghost" onclick="resetTimer()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="2" x2="11" y2="11"/><line x1="11" y1="2" x2="2" y2="11"/></svg>
+        Descartar
+      </button>
       <button class="big-btn" onclick="resumeTimer()">
-        <span class="play-ico"></span>
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor"><path d="M3 2.5l8 4-8 4V2.5z"/></svg>
         Reanudar
       </button>
       <button class="big-btn accent" onclick="commitSession()">
-        <span>Guardar ${fmtStr(h)}</span>
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5L11 3"/></svg>
+        ${saveLabel}
       </button>
     `;
   } else if (running) {
     controls = `
       <button class="big-btn ghost" onclick="pauseTimer()">
-        <span style="width:4px;height:14px;background:currentColor;border-radius:1px;box-shadow:6px 0 0 currentColor;display:inline-block;margin-right:4px;"></span>
+        <svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor"><rect x="1" y="1" width="4" height="12" rx="1"/><rect x="8" y="1" width="4" height="12" rx="1"/></svg>
         Pausar
       </button>
       <button class="big-btn" onclick="stopAndCommit()">
