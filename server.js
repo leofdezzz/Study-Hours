@@ -59,6 +59,11 @@ try {
       week_key     TEXT NOT NULL,
       PRIMARY KEY (group_id, from_user_id, to_user_id, emoji, week_key)
     );
+    CREATE TABLE IF NOT EXISTS active_sessions (
+      user_id      TEXT PRIMARY KEY,
+      subject_id   TEXT,
+      last_ping_at INTEGER NOT NULL
+    );
   `);
   // Migración: añadir columna settings a tablas existentes
   try { db.exec("ALTER TABLE user_data ADD COLUMN settings TEXT NOT NULL DEFAULT '{}'"); } catch {}
@@ -146,6 +151,7 @@ function generateCode() {
 }
 
 const VALID_EMOJIS = ['🔥','💀','😤','👑'];
+const SESSION_TTL_MS = 90 * 1000; // consider a user "studying" if pinged within 90s
 
 /* ─── Middleware ─── */
 app.use(express.json());
@@ -201,6 +207,21 @@ app.put('/api/data', auth, (req, res) => {
     return res.status(400).json({ error: 'Datos inválidos' });
   db.prepare('UPDATE user_data SET subjects=?,logs=? WHERE user_id=?')
     .run(JSON.stringify(subjects), JSON.stringify(logs), req.user.id);
+  res.json({ ok: true });
+});
+
+/* ─── Study status (real-time "estudiando ahora") ─── */
+app.post('/api/study-status', auth, (req, res) => {
+  const { studying, subjectId } = req.body || {};
+  if (studying) {
+    db.prepare(`
+      INSERT INTO active_sessions (user_id, subject_id, last_ping_at)
+      VALUES (?, ?, ?)
+      ON CONFLICT(user_id) DO UPDATE SET subject_id=excluded.subject_id, last_ping_at=excluded.last_ping_at
+    `).run(req.user.id, subjectId || null, Date.now());
+  } else {
+    db.prepare('DELETE FROM active_sessions WHERE user_id=?').run(req.user.id);
+  }
   res.json({ ok: true });
 });
 
@@ -290,6 +311,12 @@ app.get('/api/groups/:id/leaderboard', auth, (req, res) => {
     'SELECT from_user_id, to_user_id, emoji FROM reactions WHERE group_id=? AND week_key=?'
   ).all(req.params.id, weekKey);
 
+  const activeThreshold = Date.now() - SESSION_TTL_MS;
+  const activeRows = db.prepare(
+    'SELECT user_id, subject_id, last_ping_at FROM active_sessions WHERE last_ping_at > ?'
+  ).all(activeThreshold);
+  const activeByUser = new Map(activeRows.map(r => [r.user_id, r]));
+
   const board = members.map(m => {
     const received = {};
     VALID_EMOJIS.forEach(e => { received[e] = { count: 0, iMine: false }; });
@@ -299,11 +326,14 @@ app.get('/api/groups/:id/leaderboard', auth, (req, res) => {
         if (r.from_user_id === req.user.id) received[r.emoji].iMine = true;
       }
     });
+    const active = activeByUser.get(m.id);
     return {
       id: m.id,
       username: m.username,
       isMe: m.id === req.user.id,
       reactions: received,
+      studying: !!active,
+      studyingSubjectId: active?.subject_id || null,
       ...computeStats(m.logs, m.subjects)
     };
   });
