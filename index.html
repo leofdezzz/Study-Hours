@@ -216,7 +216,25 @@
     align-items: center;
     justify-content: center;
     gap: 14px;
+    padding: 0 12px;
   }
+  .stage-controls.paused {
+    gap: 8px;
+    padding: 0 10px;
+  }
+  .stage-controls.paused .big-btn {
+    height: 54px;
+    padding: 0 10px;
+    font-size: 12.5px;
+    letter-spacing: 0.01em;
+    gap: 6px;
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .stage-controls.paused .big-btn span { overflow: hidden; text-overflow: ellipsis; }
+  .stage-controls.paused .big-btn .play-ico { flex: 0 0 auto; }
   .big-btn {
     height: 64px;
     padding: 0 36px;
@@ -1370,6 +1388,15 @@ function pauseTimer() {
   pushStudyStatus(false);
   render();
 }
+function resumeTimer() {
+  if (timer.running) return;
+  if (timer.elapsed <= 0) return;
+  timer.running = true;
+  timer.startedAt = Date.now();
+  saveTimerState();
+  startStudyHeartbeat();
+  render();
+}
 function resetTimer() {
   timer = { running: false, startedAt: null, elapsed: 0, subjectId: null };
   saveTimerState();
@@ -1869,10 +1896,14 @@ function buildStage() {
   // Buttons
   let controls;
   if (armed) {
-    // Session just paused — offer Save / Discard
+    // Session paused — offer Discard / Resume / Save
     const h = ms / 1000 / 3600;
     controls = `
       <button class="big-btn ghost" onclick="resetTimer()">Descartar</button>
+      <button class="big-btn" onclick="resumeTimer()">
+        <span class="play-ico"></span>
+        Reanudar
+      </button>
       <button class="big-btn accent" onclick="commitSession()">
         <span>Guardar ${fmtStr(h)}</span>
       </button>
@@ -1911,7 +1942,7 @@ function buildStage() {
         <div class="clock serif">${clockHtml}</div>
         <div class="clock-sub"><span class="live"></span>${subLabel}</div>
       </div>
-      <div class="stage-controls">${controls}</div>
+      <div class="stage-controls${armed ? ' paused' : ''}">${controls}</div>
     </section>
   `;
 }
@@ -2330,7 +2361,7 @@ document.addEventListener('keydown', (e) => {
   if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
     e.preventDefault();
     if (timer.running) pauseTimer();
-    else if (timer.elapsed > 0) commitSession();
+    else if (timer.elapsed > 0) resumeTimer();
     else startTimer();
   }
 });
